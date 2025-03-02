@@ -146,6 +146,7 @@ export interface HourlyWeatherData {
 }
 
 export enum UvRiskLevels {
+  unknown = "Desconocido",
   low = "Bajo",
   moderate = "Moderado",
   high = "Alto",

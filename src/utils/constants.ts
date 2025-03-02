@@ -21,7 +21,7 @@ export const WEATHER_CONSTANTS = {
   ] as DailyParams[], // Parámetros predeterminados por día
   DEFAULT_PAST_DAYS: 0, // Días pasados por defecto
   DEFAULT_FORECAST_DAYS: 7, // Días de pronóstico por defecto
-};
+} as const;
 
 /* 
   https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-(uv)-index
@@ -33,11 +33,12 @@ export const WEATHER_CONSTANTS = {
                 | Make sure you seek shade. Shirt, sunscreen and hat are a must  
 */
 export const uvDescriptions: Record<string, string> = {
+  unknown: "No se puede determinar el riesgo de exposición",
   low: "Puedes disfrutar de estar afuera con seguridad",
   moderate:
     "Busca sombra durante las horas del mediodía. Ponte una remera, utiliza protector solar y un sombrero.",
   high: "Evita estar afuera durante las horas del mediodía. Asegúrate de buscar sombra. La remera, el protector solar y el sombrero son imprescindibles.",
-};
+} as const;
 
 /**
  * Descripciones de los códigos de tiempo WMO.
@@ -69,4 +70,4 @@ export const WMOWeatherTexts: Record<number, WeatherDescriptions> = {
   85: WeatherDescriptions.snow_showers_slight,
   86: WeatherDescriptions.snow_showers_heavy,
   95: WeatherDescriptions.thunderstorm,
-};
+} as const;
