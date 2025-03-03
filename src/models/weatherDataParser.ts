@@ -4,8 +4,8 @@ import {
   DailyWeatherData,
   HourlyWeatherData,
 } from "../types/weatherTypes";
-import { WMOWeatherTexts, uvDescriptions } from "../utils/constants";
-import { getUvRiskLevel } from "../utils/utils";
+import { UNITS, WMOWeatherTexts } from "../utils/constants";
+import { getUvRiskLevel, getUvDescription } from "../utils/utils";
 
 export class WeatherDataParser {
   private weatherData: WeatherData;
@@ -42,24 +42,52 @@ export class WeatherDataParser {
     startIndex: number,
     endIndex: number,
   ): DailyWeatherData[] {
-    const { daily, hourly } = this.weatherData;
+    const { daily } = this.weatherData;
     const structuredDays: DailyWeatherData[] = [];
 
-    for (let i = startIndex; i < endIndex; i++) {
-      structuredDays.push({
-        day: { value: daily.time[i], unit: "iso8601" },
-        temperatureMax: { value: daily.temperature_2m_max[i], unit: "ºC" },
-        temperatureMin: { value: daily.temperature_2m_min[i], unit: "ºC" },
-        sunrise: { value: daily.sunrise[i], unit: "iso8601" },
-        sunset: { value: daily.sunset[i], unit: "iso8601" },
-        daylightDuration: {
-          value: daily.daylight_duration[i] / 3600,
-          unit: "h",
-        },
-        hourly: this.getHourlyData(i),
-      });
-    }
+    const {
+      time,
+      temperature_2m_max,
+      temperature_2m_min,
+      sunrise,
+      sunset,
+      daylight_duration,
+    } = daily;
 
+    for (let i = startIndex; i < endIndex; i++) {
+      const dailyValues: Partial<DailyWeatherData> = {};
+
+      const dataMap: { [key: string]: any } = {
+        day: { value: time?.[i], unit: UNITS.time },
+        hourly: this.getHourlyData(i),
+        temperatureMax: {
+          value: temperature_2m_max?.[i],
+          unit: UNITS.temperature_2m_max,
+        },
+        temperatureMin: {
+          value: temperature_2m_min?.[i],
+          unit: UNITS.temperature_2m_min,
+        },
+        sunrise: { value: sunrise?.[i], unit: UNITS.sunrise },
+        sunset: { value: sunset?.[i], unit: UNITS.sunset },
+        daylightDuration: {
+          value: daylight_duration?.[i]
+            ? daylight_duration[i] / 3600
+            : undefined,
+          unit: UNITS.daylight_duration,
+        },
+      };
+
+      Object.keys(dataMap).forEach((key) => {
+        const value = dataMap[key];
+        if (key === "hourly" && value && value.length)
+          (dailyValues as any)[key] = value;
+        else if (value && value.value !== undefined)
+          (dailyValues as any)[key] = value;
+      });
+
+      structuredDays.push(dailyValues);
+    }
     return structuredDays;
   }
 
@@ -68,45 +96,88 @@ export class WeatherDataParser {
     const start = dayIndex * HOURS_PER_DAY;
     const end = start + HOURS_PER_DAY;
     const { hourly } = this.weatherData;
+
+    const {
+      time,
+      temperature_2m,
+      relative_humidity_2m,
+      dew_point_2m,
+      apparent_temperature,
+      precipitation_probability,
+      precipitation,
+      rain,
+      snowfall,
+      snow_depth,
+      weather_code,
+      pressure_msl,
+      cloud_cover,
+      visibility,
+      wind_direction_10m,
+      wind_speed_10m,
+      uv_index,
+      is_day,
+    } = hourly;
+
     const hourlyData: HourlyWeatherData[] = [];
 
     for (let i = start; i < end; i++) {
-      hourlyData.push({
-        hour: { value: hourly.time[i], unit: "iso8601" },
-        temperature: { value: hourly.temperature_2m[i], unit: "ºC" },
-        relativeHumidity: { value: hourly.relative_humidity_2m[i], unit: "%" },
-        dewPoint: { value: hourly.dew_point_2m[i], unit: "ºC" },
+      const hourlyValues: Partial<HourlyWeatherData> = {};
+
+      const dataMap: { [key: string]: any } = {
+        hour: { value: time?.[i], unit: UNITS.time },
+        temperature: { value: temperature_2m?.[i], unit: UNITS.temperature_2m },
+        weatherCode: { value: weather_code?.[i], unit: UNITS.weather_code },
+        weatherDescription: WMOWeatherTexts[weather_code?.[i]],
+        relativeHumidity: {
+          value: relative_humidity_2m?.[i],
+          unit: UNITS.relative_humidity_2m,
+        },
+        dewPoint: { value: dew_point_2m?.[i], unit: UNITS.dew_point_2m },
         apparentTemperature: {
-          value: hourly.apparent_temperature[i],
-          unit: "ºC",
+          value: apparent_temperature?.[i],
+          unit: UNITS.apparent_temperature,
         },
         precipitationProbability: {
-          value: hourly.precipitation_probability[i],
-          unit: "%",
+          value: precipitation_probability?.[i],
+          unit: UNITS.precipitation_probability,
         },
-        precipitation: { value: hourly.precipitation[i], unit: "mm" },
-        rain: { value: hourly.rain[i], unit: "mm" },
-        snowfall: { value: hourly.snowfall[i], unit: "cm" },
-        snowDepth: { value: hourly.snow_depth[i], unit: "m" },
-        weatherCode: { value: hourly.weather_code[i], unit: "wmo code" },
-        weatherDescription: WMOWeatherTexts[hourly.weather_code[i]],
-        pressureMsl: { value: hourly.pressure_msl[i], unit: "hPa" },
-        cloudCover: { value: hourly.cloud_cover[i], unit: "%" },
-        visibility: { value: hourly.visibility[i] / 1000, unit: "km" },
-        wind: {
-          direction: { value: hourly.wind_direction_10m[i], unit: "º" },
-          speed: { value: hourly.wind_speed_10m[i], unit: "km/h" },
+        precipitation: { value: precipitation?.[i], unit: UNITS.precipitation },
+        rain: { value: rain?.[i], unit: UNITS.rain },
+        snowfall: { value: snowfall?.[i], unit: UNITS.snowfall },
+        snowDepth: { value: snow_depth?.[i], unit: UNITS.snow_depth },
+        pressureMsl: { value: pressure_msl?.[i], unit: UNITS.pressure_msl },
+        cloudCover: { value: cloud_cover?.[i], unit: UNITS.cloud_cover },
+        visibility: {
+          value: visibility?.[i] ? visibility[i] / 1000 : undefined,
+          unit: UNITS.visibility,
         },
         uv: {
-          index: hourly.uv_index[i],
-          riskLevels: getUvRiskLevel(hourly.uv_index[i]),
-          description: uvDescriptions[getUvRiskLevel(hourly.uv_index[i])],
+          value: uv_index?.[i],
           unit: "",
+          riskLevels: getUvRiskLevel(uv_index?.[i]),
+          description: getUvDescription(uv_index?.[i]),
         },
-        isDay: { value: hourly.is_day[i], unit: "" },
-      });
-    }
+        wind: {
+          direction: {
+            value: wind_direction_10m?.[i],
+            unit: UNITS.wind_direction_10m,
+          },
+          speed: { value: wind_speed_10m?.[i], unit: UNITS.wind_speed_10m },
+        },
+        isDay: { value: is_day?.[i], unit: "" },
+      };
 
+      Object.keys(dataMap).forEach((key) => {
+        const value = dataMap[key];
+        if (key === "wind" && value && value.direction.value !== undefined) {
+          (hourlyValues as any)[key] = value;
+        } else if (value && value.value !== undefined) {
+          (hourlyValues as any)[key] = value;
+        }
+      });
+
+      hourlyData.push(hourlyValues);
+    }
     return hourlyData;
   }
 }
