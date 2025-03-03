@@ -12,6 +12,7 @@ export interface Location {
  * Parámetros meteorológicos disponibles en datos por hora.
  */
 export enum HourlyParams {
+  time = "time", // En formato ISO8601
   Temperature2m = "temperature_2m", // En grados Celsius ºC
   RelativeHumidity2m = "relative_humidity_2m", // En porcentaje %
   DewPoint2m = "dew_point_2m", // En grados Celsius ºC (Punto rocio)
@@ -109,40 +110,40 @@ export interface UVDataMetric {
  * Representa la información meteorológica de un día específico.
  */
 export interface DailyWeatherData {
-  day: {
+  day?: {
     value: Date;
     unit: "iso8601";
   };
-  hourly: HourlyWeatherData[];
-  temperatureMax: NumericMetric<"ºC">;
-  temperatureMin: NumericMetric<"ºC">;
-  sunrise: Metric<Date, "iso8601">;
-  sunset: Metric<Date, "iso8601">;
-  daylightDuration: NumericMetric<"h">;
+  hourly?: HourlyWeatherData[];
+  temperatureMax?: NumericMetric<"ºC">;
+  temperatureMin?: NumericMetric<"ºC">;
+  sunrise?: Metric<Date, "iso8601">;
+  sunset?: Metric<Date, "iso8601">;
+  daylightDuration?: NumericMetric<"h">;
 }
 
 /**
  *
  */
 export interface HourlyWeatherData {
-  hour: Metric<Date, "iso8601">;
-  temperature: NumericMetric<"ºC">;
-  relativeHumidity: NumericMetric<"%">;
-  dewPoint: NumericMetric<"ºC">;
-  apparentTemperature: NumericMetric<"ºC">;
-  precipitationProbability: NumericMetric<"%">;
-  precipitation: NumericMetric<"mm">;
-  rain: NumericMetric<"mm">;
-  snowfall: NumericMetric<"cm">;
-  snowDepth: NumericMetric<"m">;
-  weatherCode: NumericMetric<"wmo code">;
-  weatherDescription: WeatherDescriptions;
-  pressureMsl: NumericMetric<"hPa">;
-  cloudCover: NumericMetric<"%">;
-  visibility: NumericMetric<"km">;
-  wind: WindDataMetric;
-  uv: UVDataMetric;
-  isDay: NumericMetric<"">;
+  hour?: Metric<Date, "iso8601">;
+  temperature?: NumericMetric<"ºC">;
+  relativeHumidity?: NumericMetric<"%">;
+  dewPoint?: NumericMetric<"ºC">;
+  apparentTemperature?: NumericMetric<"ºC">;
+  precipitationProbability?: NumericMetric<"%">;
+  precipitation?: NumericMetric<"mm">;
+  rain?: NumericMetric<"mm">;
+  snowfall?: NumericMetric<"cm">;
+  snowDepth?: NumericMetric<"m">;
+  weatherCode?: NumericMetric<"wmo code">;
+  weatherDescription?: WeatherDescriptions;
+  pressureMsl?: NumericMetric<"hPa">;
+  cloudCover?: NumericMetric<"%">;
+  visibility?: NumericMetric<"km">;
+  wind?: WindDataMetric;
+  uv?: UVDataMetric;
+  isDay?: NumericMetric<"">;
 }
 
 export enum UvRiskLevels {

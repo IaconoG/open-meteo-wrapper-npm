@@ -71,3 +71,32 @@ export const WMOWeatherTexts: Record<number, WeatherDescriptions> = {
   86: WeatherDescriptions.snow_showers_heavy,
   95: WeatherDescriptions.thunderstorm,
 } as const;
+
+export const UNITS = {
+  time: "iso8601",
+  temperature_2m_max: "ºC",
+  temperature_2m_min: "ºC",
+  sunrise: "iso8601",
+  sunset: "iso8601",
+  daylight_duration: "h",
+
+  hour: "iso8601",
+  temperature_2m: "ºC",
+  relative_humidity_2m: "%",
+  dew_point_2m: "ºC",
+  apparent_temperature: "ºC",
+  precipitation_probability: "%",
+  precipitation: "mm",
+  rain: "mm",
+  snowfall: "cm",
+  snow_depth: "m",
+  weather_code: "wmo code",
+  // Description
+  pressure_msl: "hPa",
+  cloud_cover: "%",
+  visibility: "km",
+  wind_direction_10m: "º",
+  wind_speed_10m: "km/h",
+  uv_index: "",
+  is_day: "",
+} as const;
