@@ -171,6 +171,8 @@ export class WeatherDataParser {
         const value = dataMap[key];
         if (key === "wind" && value && value.direction.value !== undefined) {
           (hourlyValues as any)[key] = value;
+        } else if (key == "weatherDescription" && value !== undefined) {
+          (hourlyValues as any)[key] = value;
         } else if (value && value.value !== undefined) {
           (hourlyValues as any)[key] = value;
         }
