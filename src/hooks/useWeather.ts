@@ -3,7 +3,7 @@
  *
  */
 
-import { useWeatherStore } from "../store/useWheaterStore";
+import { useWeatherStore } from "../store/useWeatherStore";
 import {
   DailyWeatherData,
   FetchWeatherProps,
