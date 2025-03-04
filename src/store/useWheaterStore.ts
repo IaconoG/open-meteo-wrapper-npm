@@ -78,7 +78,8 @@ export const useWeatherStore = create<WeatherState & WeatherActions>(
       });
       const currentHour = new Date(currentDate);
 
-      const currentHourWeather = data.currentDay?.hourly.find((hour) => {
+      const currentHourWeather = data.currentDay?.hourly?.find((hour) => {
+        if (!hour.hour) return null;
         const hourDate = new Date(hour.hour.value);
         return hourDate.getHours() === currentHour.getHours();
       });
