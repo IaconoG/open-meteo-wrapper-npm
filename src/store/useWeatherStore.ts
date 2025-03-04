@@ -19,6 +19,7 @@ interface WeatherActions {
   isLoading: () => boolean;
   hasError: () => boolean;
   getError: () => string | null;
+  clearError: () => void;
 
   // Funciones para obtener los datos meteorológicos
   getAllWeatherData: () => StructureWeatherData | null;
