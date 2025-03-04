@@ -21,7 +21,7 @@ interface WeatherActions {
   getError: () => string | null;
 
   // Funciones para obtener los datos meteorológicos
-  getWeatherData: () => StructureWeatherData | null;
+  getAllWeatherData: () => StructureWeatherData | null;
   getCurrentDayWeather: () => DailyWeatherData | null;
   getPastDayWeather: () => DailyWeatherData[] | null;
   getForecastWeather: () => DailyWeatherData[] | null;
@@ -43,7 +43,6 @@ export const useWeatherStore = create<WeatherState & WeatherActions>(
         const result = await fetchWeather(params);
         if (!result)
           throw new Error("No se pudo obtener los datos meteorológicos");
-
         set({ data: result, loading: false, error: null });
       } catch (error) {
         const errorMessage =
@@ -64,7 +63,7 @@ export const useWeatherStore = create<WeatherState & WeatherActions>(
 
     clearError: () => set({ error: null }),
 
-    getWeatherData: () => get().data,
+    getAllWeatherData: () => get().data,
     getCurrentDayWeather: () => get().data?.currentDay || null,
     getPastDayWeather: () => get().data?.pastDay || null,
     getForecastWeather: () => get().data?.forecast || null,
