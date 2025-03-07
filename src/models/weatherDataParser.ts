@@ -154,8 +154,8 @@ export class WeatherDataParser {
         uv: {
           value: uv_index?.[i],
           unit: "",
-          riskLevels: getUvRiskLevel(uv_index?.[i]),
-          description: getUvDescription(uv_index?.[i]),
+          riskLevels: getUvRiskLevel(uv_index?.[i] || 0),
+          description: getUvDescription(uv_index?.[i] || 0),
         },
         wind: {
           direction: {
