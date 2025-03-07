@@ -3,6 +3,8 @@ import {
   FetchWeatherProps,
   WeatherData,
   StructureWeatherData,
+  FetchError,
+  ErrorType,
 } from "../types/weatherTypes";
 import { WEATHER_CONSTANTS } from "../utils/constants";
 import { WeatherDataParser } from "../models/weatherDataParser";
@@ -15,7 +17,7 @@ export const fetchWeather = async ({
   timezone = WEATHER_CONSTANTS.DEFAULT_TIMEZONE,
   past_days = WEATHER_CONSTANTS.DEFAULT_PAST_DAYS,
   forecast_days = WEATHER_CONSTANTS.DEFAULT_FORECAST_DAYS,
-}: FetchWeatherProps): Promise<StructureWeatherData | null> => {
+}: FetchWeatherProps): Promise<StructureWeatherData | FetchError> => {
   try {
     const url = new URL(BASE_URL);
     const params = new URLSearchParams({
@@ -45,7 +47,43 @@ export const fetchWeather = async ({
 
     //* Verificamos si la solicitud fue exitosa.
     if (!response.ok) {
-      throw new Error("Error al obtener los datos meteorológicos");
+      let error: FetchError = {
+        error: "",
+        type: ErrorType.ERROR,
+      };
+      if (response.status >= 500) {
+        error = {
+          error:
+            "Debido a un problema en el servidor, no podemos obtener la información del clima.",
+          info: "Por favor, inténtalo de nuevo más tarde.",
+          status: response.status,
+          type: ErrorType.ERROR,
+        };
+      } else if (response.status >= 400) {
+        if (response.status === 408) {
+          error = {
+            error: "La solicitud ha tardado demasiado tiempo en completarse.",
+            status: 408,
+            info: "Revisa tu conexión a internet e intenta de nuevo.",
+            type: ErrorType.WARNING,
+          };
+        } else {
+          error = {
+            error: "No pudimos obtener la información del clima.",
+            info: "Verifica que la ubicación ingresada sea correcta e inténtalo de nuevo.",
+            status: response.status,
+            type: ErrorType.WARNING,
+          };
+        }
+      } else {
+        error = {
+          error: "Ocurrió un error al obtener los datos del clima.",
+          status: response.status,
+          type: ErrorType.ERROR,
+        };
+      }
+
+      return error;
     }
 
     const data: WeatherData = await response.json();
@@ -53,7 +91,20 @@ export const fetchWeather = async ({
 
     return weatherData.parse();
   } catch (error) {
-    console.error(error);
-    return null;
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return {
+        error: "La solicitud ha tardado demasiado tiempo en completarse.",
+        status: 408,
+        info: "Revisa tu conexión a internet e intenta de nuevo.",
+        type: ErrorType.WARNING,
+      };
+    }
+
+    return {
+      error:
+        "Ocurrió un error inesperado al obtener los datos del meteorológicos.",
+      type: ErrorType.ERROR,
+      status: 0,
+    };
   }
 };

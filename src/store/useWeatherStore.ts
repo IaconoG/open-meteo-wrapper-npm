@@ -6,19 +6,22 @@ import {
   FetchWeatherProps,
   HourlyWeatherData,
   StructureWeatherData,
+  FetchError,
+  ErrorType,
+  ErrorInitialState,
 } from "../types/weatherTypes";
 
 interface WeatherState {
   data: StructureWeatherData | null;
   loading: boolean;
-  error: string | null;
+  error: FetchError | null;
 }
 
 interface WeatherActions {
   fetchWeather: (params: FetchWeatherProps) => Promise<void>;
   isLoading: () => boolean;
   hasError: () => boolean;
-  getError: () => string | null;
+  getError: () => FetchError | null;
   clearError: () => void;
 
   // Funciones para obtener los datos meteorológicos
@@ -38,23 +41,33 @@ export const useWeatherStore = create<WeatherState & WeatherActions>(
     error: null,
 
     fetchWeather: async (params) => {
-      set({ loading: true, error: null });
+      set({ loading: true, error: ErrorInitialState });
 
       try {
         const result = await fetchWeather(params);
-        if (!result)
-          throw new Error("No se pudo obtener los datos meteorológicos");
-        set({ data: result, loading: false, error: null });
+
+        if ("error" in (result as FetchError)) {
+          set({
+            error: result as FetchError,
+            loading: false,
+          });
+          return;
+        }
+
+        const data = result as StructureWeatherData;
+        set({ data: data, loading: false, error: ErrorInitialState });
       } catch (error) {
         const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Error al obtener los datos meteorológicos";
+          error instanceof Error ? error.message : "Error desconocido";
+
         set({
-          error: errorMessage,
+          error: {
+            error: errorMessage,
+            type: ErrorType.ERROR,
+            status: 0,
+          },
           loading: false,
         });
-        throw new Error(errorMessage);
       }
     },
 

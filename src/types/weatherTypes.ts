@@ -9,10 +9,31 @@ export interface Location {
 //** API TYPES */
 
 /**
+ * Interfaz de respuesta de la API de OpenWeather.
+ */
+export enum ErrorType {
+  SUCCESS = "success",
+  ERROR = "error",
+  WARNING = "warning",
+  INFO = "info",
+}
+export interface FetchError {
+  error: string;
+  status?: number;
+  type: ErrorType;
+  info?: string;
+}
+export const ErrorInitialState: FetchError = {
+  error: "",
+  info: "",
+  status: 0,
+  type: ErrorType.ERROR,
+};
+
+/**
  * Parámetros meteorológicos disponibles en datos por hora.
  */
 export enum HourlyParams {
-  time = "time", // En formato ISO8601
   Temperature2m = "temperature_2m", // En grados Celsius ºC
   RelativeHumidity2m = "relative_humidity_2m", // En porcentaje %
   DewPoint2m = "dew_point_2m", // En grados Celsius ºC (Punto rocio)
@@ -65,13 +86,28 @@ export interface WeatherData {
   latitude: number;
   longitude: number;
   timezone: string;
-  timezone_abbreviation: string;
-  current: { time: Date };
-  hourly: Record<HourlyParams, number[]> & { time: Date[] };
-  daily: Record<DailyParams, number[]> & {
+  timezone_abbreviation?: string;
+  current?: { time: Date };
+  hourly: {
     time: Date[];
-    sunrise: Date[];
-    sunset: Date[];
+    temperature_2m: number[];
+    weather_code: number[];
+  } & Partial<
+    Record<
+      Exclude<
+        HourlyParams,
+        HourlyParams.Temperature2m | HourlyParams.WeatherCode
+      >,
+      number[]
+    >
+  >;
+  daily: {
+    time: Date[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    sunrise?: Date[];
+    sunset?: Date[];
+    daylight_duration?: number[];
   };
 }
 
