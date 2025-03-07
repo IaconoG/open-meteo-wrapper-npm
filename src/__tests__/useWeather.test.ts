@@ -7,10 +7,14 @@
  * de un servicio externo.
  */
 
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useWeatherStore } from "../store/useWeatherStore";
 import { fetchWeather as mockFetchWeather } from "../services/weatherService";
-import { StructureWeatherData } from "../types/weatherTypes";
+import {
+  StructureWeatherData,
+  ErrorInitialState,
+  ErrorType,
+} from "../types/weatherTypes";
 import { WEATHER_CONSTANTS } from "../utils/constants";
 
 /**
@@ -26,7 +30,11 @@ describe("useWeatherStore", () => {
    * para que no interfieran entre tests.
    */
   beforeEach(() => {
-    useWeatherStore.setState({ data: null, loading: false, error: null });
+    useWeatherStore.setState({
+      data: null,
+      loading: false,
+      error: ErrorInitialState,
+    });
     jest.clearAllMocks();
   });
 
@@ -57,26 +65,42 @@ describe("useWeatherStore", () => {
 
     expect(result.current.data).toEqual(mockData);
     expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBeNull();
+    expect(result.current.error).toBe(ErrorInitialState);
   });
 
   /**
    * Test para probar que el store maneja correctamente los errores
    */
   it("fetchWeather - should handle errors", async () => {
-    (mockFetchWeather as jest.Mock).mockRejectedValue(new Error("API error"));
+    (mockFetchWeather as jest.Mock).mockRejectedValue({
+      error: "API error",
+      status: 0,
+      type: "error",
+    });
 
     const { result } = renderHook(() => useWeatherStore());
 
-    await act(async () => {
-      await expect(
-        result.current.fetchWeather({ latitude: 40.7128, longitude: -74.006 }),
-      ).rejects.toThrow("API error");
-    });
-
     expect(result.current.data).toBeNull();
     expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe("API error");
+    expect(result.current.error).toBe(ErrorInitialState);
+
+    act(() => {
+      result.current.fetchWeather({ latitude: 40.7128, longitude: -74.006 });
+    });
+
+    expect(result.current.loading).toBe(true);
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toStrictEqual({
+        error: "Error desconocido",
+        status: 0,
+        type: ErrorType.ERROR,
+      });
+    });
+
+    // 4️⃣ Asegurar que `data` sigue siendo `null`
+    expect(result.current.data).toBeNull();
   });
 
   /**
@@ -100,11 +124,21 @@ describe("useWeatherStore", () => {
     const { result } = renderHook(() => useWeatherStore());
 
     act(() => {
-      useWeatherStore.setState({ error: "Network error" });
+      useWeatherStore.setState({
+        error: {
+          error: "Network error",
+          type: ErrorType.ERROR,
+          status: 500,
+        },
+      });
     });
 
     expect(result.current.hasError()).toBe(true);
-    expect(result.current.getError()).toBe("Network error");
+    expect(result.current.getError()).toStrictEqual({
+      error: "Network error",
+      status: 500,
+      type: "error",
+    });
 
     act(() => {
       result.current.clearError();
