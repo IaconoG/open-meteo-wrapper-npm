@@ -114,6 +114,8 @@ export interface StructureWeatherData {
   pastDay: DailyWeatherData[];
   currentDay: DailyWeatherData;
   forecast: DailyWeatherData[];
+  latitude: number;
+  longitude: number;
   timezone: string;
 }
 
@@ -179,7 +181,12 @@ type AllowedMetricTypes = Metric<number, string> | Metric<Date, string>;
 
 // Representa la información meteorológica por hora
 export interface HourlyWeatherData extends BaseHourlyWeatherData {
-  [key: string]: AllowedMetricTypes | WeatherDescriptions | WindDataMetric | UVDataMetric | undefined;
+  [key: string]:
+    | AllowedMetricTypes
+    | WeatherDescriptions
+    | WindDataMetric
+    | UVDataMetric
+    | undefined;
 }
 
 // Niveles de riesgo del índice UV

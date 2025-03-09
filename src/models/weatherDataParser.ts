@@ -53,6 +53,8 @@ export class WeatherDataParser {
       )[0],
       forecast: this.processWeatherData(forecastDayStartIndex, totalDays),
       timezone: this.weatherData.timezone,
+      latitude: this.weatherData.latitude,
+      longitude: this.weatherData.longitude,
     };
   }
 
@@ -81,7 +83,13 @@ export class WeatherDataParser {
     for (let i = startIndex; i < endIndex; i++) {
       const dailyValues: Partial<DailyWeatherData> = {};
 
-      const dataMap: Record<string, Metric<Date | number, string> | NumericMetric<string> | WeatherDescriptions | HourlyWeatherData[]> = {
+      const dataMap: Record<
+        string,
+        | Metric<Date | number, string>
+        | NumericMetric<string>
+        | WeatherDescriptions
+        | HourlyWeatherData[]
+      > = {
         day: { value: time?.[i], unit: UNITS.time },
         hourly: this.getHourlyData(i),
         temperatureMax: {
@@ -144,10 +152,23 @@ export class WeatherDataParser {
     for (let i = start; i < end; i++) {
       const hourlyValues: HourlyWeatherData = {};
 
-      const dataMap: Record<string, Metric<Date | number, string> | NumericMetric<string> | WeatherDescriptions | WindDataMetric | UVDataMetric> = {
+      const dataMap: Record<
+        string,
+        | Metric<Date | number, string>
+        | NumericMetric<string>
+        | WeatherDescriptions
+        | WindDataMetric
+        | UVDataMetric
+      > = {
         hour: { value: time?.[i] ?? new Date(), unit: UNITS.time },
-        temperature: { value: temperature_2m?.[i] ?? 0, unit: UNITS.temperature_2m },
-        weatherCode: { value: weather_code?.[i] ?? 0, unit: UNITS.weather_code },
+        temperature: {
+          value: temperature_2m?.[i] ?? 0,
+          unit: UNITS.temperature_2m,
+        },
+        weatherCode: {
+          value: weather_code?.[i] ?? 0,
+          unit: UNITS.weather_code,
+        },
         weatherDescription: WMOWeatherTexts[weather_code?.[i] ?? 0],
         relativeHumidity: {
           value: relative_humidity_2m?.[i] ?? 0,
@@ -162,11 +183,17 @@ export class WeatherDataParser {
           value: precipitation_probability?.[i] ?? 0,
           unit: UNITS.precipitation_probability,
         },
-        precipitation: { value: precipitation?.[i] ?? 0, unit: UNITS.precipitation },
+        precipitation: {
+          value: precipitation?.[i] ?? 0,
+          unit: UNITS.precipitation,
+        },
         rain: { value: rain?.[i] ?? 0, unit: UNITS.rain },
         snowfall: { value: snowfall?.[i] ?? 0, unit: UNITS.snowfall },
         snowDepth: { value: snow_depth?.[i] ?? 0, unit: UNITS.snow_depth },
-        pressureMsl: { value: pressure_msl?.[i] ?? 0, unit: UNITS.pressure_msl },
+        pressureMsl: {
+          value: pressure_msl?.[i] ?? 0,
+          unit: UNITS.pressure_msl,
+        },
         cloudCover: { value: cloud_cover?.[i] ?? 0, unit: UNITS.cloud_cover },
         visibility: {
           value: visibility?.[i] ? visibility[i] / 1000 : 0,
@@ -183,7 +210,10 @@ export class WeatherDataParser {
             value: wind_direction_10m?.[i] ?? 0,
             unit: UNITS.wind_direction_10m,
           },
-          speed: { value: wind_speed_10m?.[i] ?? 0, unit: UNITS.wind_speed_10m },
+          speed: {
+            value: wind_speed_10m?.[i] ?? 0,
+            unit: UNITS.wind_speed_10m,
+          },
         },
         isDay: { value: is_day?.[i] ?? 0, unit: "" },
       };
@@ -200,14 +230,32 @@ export class WeatherDataParser {
    * @param target - Objeto destino donde se asignarán los valores.
    * @param dataMap - Mapa de datos con las claves y valores a asignar.
    */
-  private assignValues(target: Partial<DailyWeatherData> | HourlyWeatherData, dataMap: Record<string, Metric<Date | number, string> | NumericMetric<string> | WeatherDescriptions | HourlyWeatherData[] | WindDataMetric | UVDataMetric>) {
+  private assignValues(
+    target: Partial<DailyWeatherData> | HourlyWeatherData,
+    dataMap: Record<
+      string,
+      | Metric<Date | number, string>
+      | NumericMetric<string>
+      | WeatherDescriptions
+      | HourlyWeatherData[]
+      | WindDataMetric
+      | UVDataMetric
+    >,
+  ) {
     Object.keys(dataMap).forEach((key) => {
       const value = dataMap[key];
-      if (key === "wind" && value && (value as WindDataMetric).direction?.value !== undefined) {
+      if (
+        key === "wind" &&
+        value &&
+        (value as WindDataMetric).direction?.value !== undefined
+      ) {
         (target as HourlyWeatherData)[key] = value as WindDataMetric;
       } else if (key == "weatherDescription" && value !== undefined) {
         (target as HourlyWeatherData)[key] = value as WeatherDescriptions;
-      } else if (value && (value as Metric<Date | number, string>).value !== undefined) {
+      } else if (
+        value &&
+        (value as Metric<Date | number, string>).value !== undefined
+      ) {
         (target as any)[key] = value;
       }
     });
