@@ -20,6 +20,8 @@ interface WeatherState {
   data: StructureWeatherData | null;
   loading: boolean;
   error: FetchError | null;
+  autoRefresh: boolean; // Opción por defecto
+  fetchParams: FetchWeatherProps | null;
 }
 
 /**
@@ -28,6 +30,7 @@ interface WeatherState {
 interface WeatherActions {
   //Acción para obtener los datos meteorológicos
   fetchWeather: (params: FetchWeatherProps) => Promise<void>;
+
   //Función para verificar si está cargando
   isLoading: () => boolean;
   //Función para verificar si hay un error
@@ -36,6 +39,11 @@ interface WeatherActions {
   getError: () => FetchError | null;
   //Función para limpiar el error
   clearError: () => void;
+
+  // Función para obtener el estado de la actualización automática
+  setAutoRefresh: (value: boolean) => void; // Acción para configurar el refresco automático
+  // Función para programar la actualización de los datos meteorológicos automáticamente
+  scheduleAutoRefresh: () => void; // Acción para programar el refresco automático
 
   //Función para obtener todos los datos meteorológicos
   getAllWeatherData: () => StructureWeatherData | null;
@@ -59,12 +67,15 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
       data: null,
       loading: false,
       error: null,
+      autoRefresh: true, // Opción por defecto
+      fetchParams: null,
 
       fetchWeather: async (params) => {
         set(
           produce((state) => {
             state.loading = true;
             state.error = ErrorInitialState;
+            state.fetchParams = params;
           }),
         );
 
@@ -117,6 +128,30 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
           }),
         ),
 
+      setAutoRefresh: (value) => {
+        set({ autoRefresh: value });
+        if (value) get().scheduleAutoRefresh();
+      },
+
+      scheduleAutoRefresh: () => {
+        const { data, fetchParams } = get();
+        if (!data || !data.timezone || !fetchParams) return;
+
+        const now = new Date().toLocaleString("en-US", {
+          timeZone: data.timezone,
+        });
+        const currentDate = new Date(now);
+
+        const midnight = new Date(currentDate);
+        midnight.setHours(24, 0, 0, 0); // Próxima medianoche
+        const timeToMidnight = midnight.getTime() - currentDate.getTime();
+
+        setTimeout(async () => {
+          await get().fetchWeather(fetchParams);
+          get().scheduleAutoRefresh(); // Reprogramar para la próxima medianoche
+        }, timeToMidnight);
+      },
+
       getAllWeatherData: () => get().data,
       getCurrentDayWeather: () => get().data?.currentDay || null,
       getPastDayWeather: () => get().data?.pastDay || null,
@@ -148,3 +183,11 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
     },
   ),
 );
+
+/**
+ * Programar la actualización automática si está habilitada
+ * Se ejecuta al cargar la aplicación
+ */
+if (useWeatherStore.getState().autoRefresh) {
+  useWeatherStore.getState().scheduleAutoRefresh();
+}

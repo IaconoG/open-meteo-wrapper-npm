@@ -20,6 +20,7 @@ interface UseWeatherReturn {
   isLoading: () => boolean;
   hasError: () => boolean;
   getError: () => FetchError | null;
+  setAutoRefresh: (value: boolean) => void;
 }
 
 /**
@@ -36,6 +37,7 @@ export const useWeather = (): UseWeatherReturn => {
     isLoading,
     hasError,
     getError,
+    setAutoRefresh,
   } = useWeatherStore();
 
   return {
@@ -48,5 +50,6 @@ export const useWeather = (): UseWeatherReturn => {
     isLoading,
     hasError,
     getError,
+    setAutoRefresh,
   };
 };
