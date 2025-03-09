@@ -8,6 +8,7 @@ import {
   StructureWeatherData,
   FetchError,
   ErrorType,
+  MessageType,
   ErrorInitialState,
 } from "../types/weatherTypes";
 
@@ -55,7 +56,7 @@ export const useWeatherStore = create<WeatherState & WeatherActions>(
         }
 
         const data = result as StructureWeatherData;
-        set({ data: data, loading: false, error: ErrorInitialState });
+        set({ data: data, loading: false, error: null });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Error desconocido";
@@ -63,8 +64,9 @@ export const useWeatherStore = create<WeatherState & WeatherActions>(
         set({
           error: {
             error: errorMessage,
-            type: ErrorType.ERROR,
-            status: 0,
+            type: MessageType.WARNING,
+            errorType: ErrorType.UNKNOWN_ERROR,
+            status: 0, // Status 0 para errores desconocidos
           },
           loading: false,
         });

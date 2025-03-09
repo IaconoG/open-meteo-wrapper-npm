@@ -5,6 +5,7 @@ import {
   StructureWeatherData,
   FetchError,
   ErrorType,
+  MessageType,
 } from "../types/weatherTypes";
 import { WEATHER_CONSTANTS } from "../utils/constants";
 import { WeatherDataParser } from "../models/weatherDataParser";
@@ -48,8 +49,10 @@ export const fetchWeather = async ({
     //* Verificamos si la solicitud fue exitosa.
     if (!response.ok) {
       let error: FetchError = {
-        error: "",
-        type: ErrorType.ERROR,
+        error: "Error desconocido.",
+        type: MessageType.ERROR,
+        errorType: ErrorType.UNKNOWN_ERROR,
+        status: 0,
       };
       if (response.status >= 500) {
         error = {
@@ -57,7 +60,8 @@ export const fetchWeather = async ({
             "Debido a un problema en el servidor, no podemos obtener la información del clima.",
           info: "Por favor, inténtalo de nuevo más tarde.",
           status: response.status,
-          type: ErrorType.ERROR,
+          type: MessageType.ERROR,
+          errorType: ErrorType.API_ERROR,
         };
       } else if (response.status >= 400) {
         if (response.status === 408) {
@@ -65,21 +69,24 @@ export const fetchWeather = async ({
             error: "La solicitud ha tardado demasiado tiempo en completarse.",
             status: 408,
             info: "Revisa tu conexión a internet e intenta de nuevo.",
-            type: ErrorType.WARNING,
+            type: MessageType.WARNING,
+            errorType: ErrorType.NETWORK_ERROR,
           };
         } else {
           error = {
             error: "No pudimos obtener la información del clima.",
             info: "Verifica que la ubicación ingresada sea correcta e inténtalo de nuevo.",
             status: response.status,
-            type: ErrorType.WARNING,
+            type: MessageType.WARNING,
+            errorType: ErrorType.API_ERROR,
           };
         }
       } else {
         error = {
           error: "Ocurrió un error al obtener los datos del clima.",
           status: response.status,
-          type: ErrorType.ERROR,
+          type: MessageType.ERROR,
+          errorType: ErrorType.UNKNOWN_ERROR,
         };
       }
 
@@ -96,15 +103,16 @@ export const fetchWeather = async ({
         error: "La solicitud ha tardado demasiado tiempo en completarse.",
         status: 408,
         info: "Revisa tu conexión a internet e intenta de nuevo.",
-        type: ErrorType.WARNING,
+        type: MessageType.WARNING,
+        errorType: ErrorType.NETWORK_ERROR,
       };
     }
 
     return {
-      error:
-        "Ocurrió un error inesperado al obtener los datos del meteorológicos.",
-      type: ErrorType.ERROR,
+      error: "Ocurrió un error inesperado al obtener los datos meteorológicos.",
+      type: MessageType.ERROR,
       status: 0,
+      errorType: ErrorType.UNKNOWN_ERROR,
     };
   }
 };

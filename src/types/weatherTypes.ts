@@ -11,23 +11,32 @@ export interface Location {
 /**
  * Interfaz de respuesta de la API de OpenWeather.
  */
-export enum ErrorType {
+export enum MessageType {
   SUCCESS = "success",
   ERROR = "error",
   WARNING = "warning",
   INFO = "info",
 }
+export enum ErrorType {
+  NETWORK_ERROR = "network_error",
+  API_ERROR = "api_error",
+  DATA_ERROR = "data_error",
+  UNKNOWN_ERROR = "unknown_error",
+}
+
 export interface FetchError {
   error: string;
   status?: number;
-  type: ErrorType;
+  type: MessageType;
+  errorType: ErrorType;
   info?: string;
 }
 export const ErrorInitialState: FetchError = {
   error: "",
   info: "",
   status: 0,
-  type: ErrorType.ERROR,
+  type: MessageType.ERROR,
+  errorType: ErrorType.UNKNOWN_ERROR,
 };
 
 /**
