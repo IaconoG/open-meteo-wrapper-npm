@@ -6,6 +6,7 @@
 import { useWeatherStore } from "../store/useWeatherStore";
 import {
   DailyWeatherData,
+  FetchError,
   FetchWeatherProps,
   HourlyWeatherData,
   StructureWeatherData,
@@ -20,7 +21,7 @@ interface UseWeatherReturn {
   getCurrentHourWeather: () => HourlyWeatherData | null;
   isLoading: () => boolean;
   hasError: () => boolean;
-  getError: () => string | null;
+  getError: () => FetchError | null;
 }
 
 export const useWeather = (): UseWeatherReturn => {
