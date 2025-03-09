@@ -1,8 +1,3 @@
-/**
- * @description Weather hook to fetch and manage weather data
- *
- */
-
 import { useWeatherStore } from "../store/useWeatherStore";
 import {
   DailyWeatherData,
@@ -12,6 +7,9 @@ import {
   StructureWeatherData,
 } from "../types/weatherTypes";
 
+/**
+ * Definición de las funciones disponibles para el hook useWeather
+ */
 interface UseWeatherReturn {
   fetchWeather: (params: FetchWeatherProps) => Promise<void>;
   getAllWeatherData: () => StructureWeatherData | null;
@@ -24,6 +22,9 @@ interface UseWeatherReturn {
   getError: () => FetchError | null;
 }
 
+/**
+ * Hook personalizado para el manejo de los datos meteorológicos
+ */
 export const useWeather = (): UseWeatherReturn => {
   const {
     fetchWeather,
