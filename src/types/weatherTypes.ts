@@ -1,22 +1,18 @@
-/**
- * Representa una ubicación geográfica con latitud y longitud.
- */
+// Representa una ubicación geográfica con latitud y longitud.
 export interface Location {
   readonly lat: number;
   readonly lng: number;
 }
 
-//** API TYPES */
-
-/**
- * Interfaz de respuesta de la API de OpenWeather.
- */
+// Tipos de mensajes de la API
 export enum MessageType {
   SUCCESS = "success",
   ERROR = "error",
   WARNING = "warning",
   INFO = "info",
 }
+
+// Tipos de errores de la API
 export enum ErrorType {
   NETWORK_ERROR = "network_error",
   API_ERROR = "api_error",
@@ -24,6 +20,7 @@ export enum ErrorType {
   UNKNOWN_ERROR = "unknown_error",
 }
 
+// Estructura de un error de la API
 export interface FetchError {
   error: string;
   status?: number;
@@ -31,6 +28,8 @@ export interface FetchError {
   errorType: ErrorType;
   info?: string;
 }
+
+// Estado inicial de un error
 export const ErrorInitialState: FetchError = {
   error: "",
   info: "",
@@ -39,9 +38,7 @@ export const ErrorInitialState: FetchError = {
   errorType: ErrorType.UNKNOWN_ERROR,
 };
 
-/**
- * Parámetros meteorológicos disponibles en datos por hora.
- */
+// Parámetros meteorológicos disponibles en datos por hora
 export enum HourlyParams {
   Temperature2m = "temperature_2m", // En grados Celsius ºC
   RelativeHumidity2m = "relative_humidity_2m", // En porcentaje %
@@ -62,9 +59,7 @@ export enum HourlyParams {
   IsDay = "is_day", // Indica si es de día o de noche (1: día, 0: noche)
 }
 
-/**
- * Parámetros meteorológicos disponibles en datos diarios.
- */
+// Parámetros meteorológicos disponibles en datos diarios
 export enum DailyParams {
   Temperature2mMax = "temperature_2m_max",
   Temperature2mMin = "temperature_2m_min",
@@ -73,9 +68,7 @@ export enum DailyParams {
   DaylightDuration = "daylight_duration",
 }
 
-/**
- * Propiedades necesarias para realizar una solicitud de datos meteorológicos.
- */
+// Propiedades necesarias para realizar una solicitud de datos meteorológicos
 export interface FetchWeatherProps {
   latitude: number;
   longitude: number;
@@ -86,11 +79,7 @@ export interface FetchWeatherProps {
   forecast_days?: number;
 }
 
-//** MODELS */
-
-/**
- * Estructura de los datos meteorológicos obtenidos de la API.
- */
+// Estructura de los datos meteorológicos obtenidos de la API
 export interface WeatherData {
   latitude: number;
   longitude: number;
@@ -120,9 +109,7 @@ export interface WeatherData {
   };
 }
 
-/**
- * Estructura global con datos meteorológicos organizados.
- */
+// Estructura global con datos meteorológicos organizados
 export interface StructureWeatherData {
   pastDay: DailyWeatherData[];
   currentDay: DailyWeatherData;
@@ -130,20 +117,20 @@ export interface StructureWeatherData {
   timezone: string;
 }
 
-/**
- * Representa el tipo base para los datos meteorológicos.
- */
+// Representa el tipo base para los datos meteorológicos
 export type Metric<T, U extends string = ""> = {
   value: T;
   unit: U;
 };
 export type NumericMetric<U extends string = ""> = Metric<number, U>;
 
+// Datos del viento
 export interface WindDataMetric {
   speed: NumericMetric<"km/h">;
   direction?: NumericMetric<"º">;
 }
 
+// Datos del índice UV
 export interface UVDataMetric {
   index: number;
   riskLevels: string;
@@ -151,9 +138,7 @@ export interface UVDataMetric {
   unit: "";
 }
 
-/**
- * Representa la información meteorológica de un día específico.
- */
+// Representa la información meteorológica de un día específico
 export interface DailyWeatherData {
   day?: {
     value: Date;
@@ -167,10 +152,8 @@ export interface DailyWeatherData {
   daylightDuration?: NumericMetric<"h">;
 }
 
-/**
- *
- */
-export interface HourlyWeatherData {
+// Representa la información meteorológica por hora
+interface BaseHourlyWeatherData {
   hour?: Metric<Date, "iso8601">;
   temperature?: NumericMetric<"ºC">;
   relativeHumidity?: NumericMetric<"%">;
@@ -191,6 +174,15 @@ export interface HourlyWeatherData {
   isDay?: NumericMetric<"">;
 }
 
+// Tipos permitidos para las métricas
+type AllowedMetricTypes = Metric<number, string> | Metric<Date, string>;
+
+// Representa la información meteorológica por hora
+export interface HourlyWeatherData extends BaseHourlyWeatherData {
+  [key: string]: AllowedMetricTypes | WeatherDescriptions | WindDataMetric | UVDataMetric | undefined;
+}
+
+// Niveles de riesgo del índice UV
 export enum UvRiskLevels {
   unknown = "Desconocido",
   low = "Bajo",
