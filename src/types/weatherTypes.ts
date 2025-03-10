@@ -31,7 +31,7 @@ export interface FetchError {
 
 // Estado inicial de un error
 export const ErrorInitialState: FetchError = {
-  error: "",
+  error: "Error desconocido.",
   info: "",
   status: 0,
   type: MessageType.ERROR,
@@ -128,14 +128,14 @@ export type NumericMetric<U extends string = ""> = Metric<number, U>;
 
 // Datos del viento
 export interface WindDataMetric {
-  speed: NumericMetric<"km/h">;
-  direction?: NumericMetric<"º">;
+  speed: NumericMetric<"km/h"> | { value: undefined; unit: "km/h" };
+  direction?: NumericMetric<"º"> | { value: undefined; unit: "º" };
 }
 
 // Datos del índice UV
 export interface UVDataMetric {
-  index: number;
-  riskLevels: string;
+  value: number;
+  riskLevel: string;
   description: string;
   unit: "";
 }
@@ -155,7 +155,7 @@ export interface DailyWeatherData {
 }
 
 // Representa la información meteorológica por hora
-interface BaseHourlyWeatherData {
+export interface HourlyWeatherData {
   hour?: Metric<Date, "iso8601">;
   temperature?: NumericMetric<"ºC">;
   relativeHumidity?: NumericMetric<"%">;
@@ -174,19 +174,6 @@ interface BaseHourlyWeatherData {
   wind?: WindDataMetric;
   uv?: UVDataMetric;
   isDay?: NumericMetric<"">;
-}
-
-// Tipos permitidos para las métricas
-type AllowedMetricTypes = Metric<number, string> | Metric<Date, string>;
-
-// Representa la información meteorológica por hora
-export interface HourlyWeatherData extends BaseHourlyWeatherData {
-  [key: string]:
-    | AllowedMetricTypes
-    | WeatherDescriptions
-    | WindDataMetric
-    | UVDataMetric
-    | undefined;
 }
 
 // Niveles de riesgo del índice UV
