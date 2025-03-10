@@ -10,6 +10,7 @@ import {
 import { WEATHER_CONSTANTS } from "../utils/constants";
 import { WeatherDataParser } from "../models/weatherDataParser";
 
+// Función para obtener datos meteorológicos de una API
 export const fetchWeather = async ({
   latitude,
   longitude,
@@ -20,7 +21,9 @@ export const fetchWeather = async ({
   forecast_days = WEATHER_CONSTANTS.DEFAULT_FORECAST_DAYS,
 }: FetchWeatherProps): Promise<StructureWeatherData | FetchError> => {
   try {
+    // Construir la URL de la solicitud
     const url = new URL(BASE_URL);
+    // Configurar los parámetros de la solicitud
     const params = new URLSearchParams({
       latitude: latitude.toString(),
       longitude: longitude.toString(),
@@ -31,22 +34,22 @@ export const fetchWeather = async ({
       forecast_days: forecast_days.toString(),
     });
 
-    //* Establecemos los parámetros de búsqueda de la URL.
+    // Establecemos los parámetros de búsqueda de la URL.
     url.search = params.toString();
 
-    //* Creamos un nuevo AbortController y un temporizador para cancelar la solicitud después de 10 segundos.
+    // Creamos un nuevo AbortController y un temporizador para cancelar la solicitud después de 10 segundos.
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
 
-    //* Realizamos la solicitud a la API.
+    // Realizamos la solicitud a la API.
     const response = await fetch(url.toString(), {
       signal: controller.signal,
     });
 
-    //* Limpiamos el temporizador.
+    // Limpiamos el temporizador.
     clearTimeout(timeout);
 
-    //* Verificamos si la solicitud fue exitosa.
+    // Verificamos si la solicitud fue exitosa.
     if (!response.ok) {
       let error: FetchError = {
         error: "Error desconocido.",
