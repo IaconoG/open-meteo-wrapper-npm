@@ -72,6 +72,9 @@ export const WMOWeatherTexts: Record<number, WeatherDescriptions> = {
   95: WeatherDescriptions.thunderstorm,
 } as const;
 
+/**
+ * Unidades de medida para los datos meteorológicos.
+ */
 export const UNITS = {
   time: "iso8601",
   temperature_2m_max: "ºC",
