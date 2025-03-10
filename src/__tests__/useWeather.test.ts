@@ -14,6 +14,7 @@ import {
   StructureWeatherData,
   ErrorInitialState,
   ErrorType,
+  MessageType,
 } from "../types/weatherTypes";
 import { WEATHER_CONSTANTS } from "../utils/constants";
 
@@ -43,6 +44,8 @@ describe("useWeatherStore", () => {
    */
   it("fetchWeather - should fetch weather data successfully", async () => {
     const mockData: StructureWeatherData = {
+      latitude: 40.7128,
+      longitude: -74.006,
       timezone: "America/New_York",
       currentDay: {
         hourly: [
@@ -65,7 +68,7 @@ describe("useWeatherStore", () => {
 
     expect(result.current.data).toEqual(mockData);
     expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe(ErrorInitialState);
+    expect(result.current.error).toBeNull();
   });
 
   /**
@@ -73,9 +76,10 @@ describe("useWeatherStore", () => {
    */
   it("fetchWeather - should handle errors", async () => {
     (mockFetchWeather as jest.Mock).mockRejectedValue({
-      error: "API error",
-      status: 0,
-      type: "error",
+      error: "Network error",
+      type: MessageType.ERROR,
+      errorType: ErrorType.API_ERROR,
+      status: 500,
     });
 
     const { result } = renderHook(() => useWeatherStore());
@@ -93,13 +97,14 @@ describe("useWeatherStore", () => {
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toStrictEqual({
-        error: "Error desconocido",
+        error: "Error desconocido.",
+        type: MessageType.WARNING,
+        errorType: ErrorType.UNKNOWN_ERROR,
         status: 0,
-        type: ErrorType.ERROR,
       });
     });
 
-    // 4️⃣ Asegurar que `data` sigue siendo `null`
+    // Asegurarse de que `data` sigue siendo `null`
     expect(result.current.data).toBeNull();
   });
 
@@ -127,7 +132,8 @@ describe("useWeatherStore", () => {
       useWeatherStore.setState({
         error: {
           error: "Network error",
-          type: ErrorType.ERROR,
+          type: MessageType.ERROR,
+          errorType: ErrorType.API_ERROR,
           status: 500,
         },
       });
@@ -136,8 +142,9 @@ describe("useWeatherStore", () => {
     expect(result.current.hasError()).toBe(true);
     expect(result.current.getError()).toStrictEqual({
       error: "Network error",
+      type: MessageType.ERROR,
+      errorType: ErrorType.API_ERROR,
       status: 500,
-      type: "error",
     });
 
     act(() => {
@@ -157,6 +164,8 @@ describe("useWeatherStore", () => {
       pastDay: [],
       forecast: [],
       timezone: WEATHER_CONSTANTS.DEFAULT_TIMEZONE,
+      latitude: 0,
+      longitude: 0,
     };
     useWeatherStore.setState({ data: mockData });
 
@@ -171,13 +180,15 @@ describe("useWeatherStore", () => {
   it("should return current hour weather", () => {
     const timezoneTest = "America/New_York";
     const mockData: StructureWeatherData = {
+      latitude: 40.7128,
+      longitude: -74.006,
       timezone: timezoneTest,
       currentDay: {
         hourly: [
           {
             hour: {
               value: new Date(
-                new Date().toLocaleString("en-US", {
+                new Date().toLocaleString("es-ES", {
                   timeZone: timezoneTest,
                 }),
               ),
