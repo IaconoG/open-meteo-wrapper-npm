@@ -89,28 +89,31 @@ export class WeatherDataParser {
         | NumericMetric<string>
         | WeatherDescriptions
         | HourlyWeatherData[]
+        | { value: undefined; unit: string }
       > = {
         day: { value: time?.[i], unit: UNITS.time },
         hourly: this.getHourlyData(i),
         temperatureMax: {
-          value: temperature_2m_max?.[i] ?? 0,
+          value: temperature_2m_max?.[i],
           unit: UNITS.temperature_2m_max,
         },
         temperatureMin: {
-          value: temperature_2m_min?.[i] ?? 0,
+          value: temperature_2m_min?.[i],
           unit: UNITS.temperature_2m_min,
         },
-        sunrise: { value: sunrise?.[i] ?? new Date(), unit: UNITS.sunrise },
-        sunset: { value: sunset?.[i] ?? new Date(), unit: UNITS.sunset },
+        sunrise: { value: sunrise?.[i], unit: UNITS.sunrise },
+        sunset: { value: sunset?.[i], unit: UNITS.sunset },
         daylightDuration: {
-          value: daylight_duration?.[i] ? daylight_duration[i] / 3600 : 0,
+          value: daylight_duration?.[i]
+            ? daylight_duration[i] / 3600
+            : undefined,
           unit: UNITS.daylight_duration,
         },
       };
 
       this.assignValues(dailyValues, dataMap);
-
-      structuredDays.push(dailyValues);
+      if (Object.keys(dailyValues).length > 0) structuredDays.push(dailyValues);
+      break;
     }
     return structuredDays;
   }
@@ -159,68 +162,80 @@ export class WeatherDataParser {
         | WeatherDescriptions
         | WindDataMetric
         | UVDataMetric
+        | { value: undefined; unit: string }
       > = {
-        hour: { value: time?.[i] ?? new Date(), unit: UNITS.time },
+        hour: { value: time?.[i], unit: UNITS.time } as Metric<Date, "iso8601">,
         temperature: {
-          value: temperature_2m?.[i] ?? 0,
+          value: temperature_2m?.[i],
           unit: UNITS.temperature_2m,
-        },
+        } as NumericMetric<"ºC">,
         weatherCode: {
-          value: weather_code?.[i] ?? 0,
+          value: weather_code?.[i],
           unit: UNITS.weather_code,
-        },
-        weatherDescription: WMOWeatherTexts[weather_code?.[i] ?? 0],
+        } as NumericMetric<"wmo code">,
+        weatherDescription: WMOWeatherTexts[weather_code?.[i]],
         relativeHumidity: {
-          value: relative_humidity_2m?.[i] ?? 0,
+          value: relative_humidity_2m?.[i],
           unit: UNITS.relative_humidity_2m,
-        },
-        dewPoint: { value: dew_point_2m?.[i] ?? 0, unit: UNITS.dew_point_2m },
+        } as NumericMetric<"%">,
+        dewPoint: {
+          value: dew_point_2m?.[i],
+          unit: UNITS.dew_point_2m,
+        } as NumericMetric<"ºC">,
         apparentTemperature: {
-          value: apparent_temperature?.[i] ?? 0,
+          value: apparent_temperature?.[i],
           unit: UNITS.apparent_temperature,
-        },
+        } as NumericMetric<"ºC">,
         precipitationProbability: {
-          value: precipitation_probability?.[i] ?? 0,
+          value: precipitation_probability?.[i],
           unit: UNITS.precipitation_probability,
-        },
+        } as NumericMetric<"%">,
         precipitation: {
-          value: precipitation?.[i] ?? 0,
+          value: precipitation?.[i],
           unit: UNITS.precipitation,
-        },
-        rain: { value: rain?.[i] ?? 0, unit: UNITS.rain },
-        snowfall: { value: snowfall?.[i] ?? 0, unit: UNITS.snowfall },
-        snowDepth: { value: snow_depth?.[i] ?? 0, unit: UNITS.snow_depth },
+        } as NumericMetric<"mm">,
+        rain: { value: rain?.[i], unit: UNITS.rain } as NumericMetric<"mm">,
+        snowfall: {
+          value: snowfall?.[i],
+          unit: UNITS.snowfall,
+        } as NumericMetric<"cm">,
+        snowDepth: {
+          value: snow_depth?.[i],
+          unit: UNITS.snow_depth,
+        } as NumericMetric<"m">,
         pressureMsl: {
-          value: pressure_msl?.[i] ?? 0,
+          value: pressure_msl?.[i],
           unit: UNITS.pressure_msl,
-        },
-        cloudCover: { value: cloud_cover?.[i] ?? 0, unit: UNITS.cloud_cover },
+        } as NumericMetric<"hPa">,
+        cloudCover: {
+          value: cloud_cover?.[i],
+          unit: UNITS.cloud_cover,
+        } as NumericMetric<"%">,
         visibility: {
-          value: visibility?.[i] ? visibility[i] / 1000 : 0,
+          value: visibility?.[i] ? visibility[i] / 1000 : undefined,
           unit: UNITS.visibility,
-        },
+        } as NumericMetric<"km">,
         uv: {
-          value: uv_index?.[i] ?? 0,
+          value: uv_index?.[i],
           unit: "",
-          riskLevels: getUvRiskLevel(uv_index?.[i] ?? 0),
+          riskLevel: getUvRiskLevel(uv_index?.[i] ?? 0),
           description: getUvDescription(uv_index?.[i] ?? 0),
-        },
+        } as UVDataMetric,
         wind: {
           direction: {
-            value: wind_direction_10m?.[i] ?? 0,
+            value: wind_direction_10m?.[i],
             unit: UNITS.wind_direction_10m,
-          },
+          } as NumericMetric<"º">,
           speed: {
-            value: wind_speed_10m?.[i] ?? 0,
+            value: wind_speed_10m?.[i],
             unit: UNITS.wind_speed_10m,
-          },
-        },
-        isDay: { value: is_day?.[i] ?? 0, unit: "" },
+          } as NumericMetric<"km/h">,
+        } as WindDataMetric,
+        isDay: { value: is_day?.[i], unit: UNITS.is_day } as NumericMetric<"">,
       };
-
       this.assignValues(hourlyValues, dataMap);
 
-      hourlyData.push(hourlyValues);
+      if (Object.keys(hourlyValues).length > 0) hourlyData.push(hourlyValues);
     }
     return hourlyData;
   }
@@ -240,10 +255,12 @@ export class WeatherDataParser {
       | HourlyWeatherData[]
       | WindDataMetric
       | UVDataMetric
+      | { value: undefined; unit: string }
     >,
   ) {
     Object.keys(dataMap).forEach((key) => {
       const value = dataMap[key];
+
       if (
         key === "wind" &&
         value &&
@@ -252,11 +269,15 @@ export class WeatherDataParser {
         (target as HourlyWeatherData)[key] = value as WindDataMetric;
       } else if (key == "weatherDescription" && value !== undefined) {
         (target as HourlyWeatherData)[key] = value as WeatherDescriptions;
-      } else if (
-        value &&
-        (value as Metric<Date | number, string>).value !== undefined
-      ) {
-        (target as any)[key] = value;
+      } else if (key === "hourly" && value) {
+        (target as DailyWeatherData)[key] = value as HourlyWeatherData[];
+      } else if (value && (value as Metric<Date | number, string>).value) {
+        (target as DailyWeatherData | HourlyWeatherData)[key] = value as
+          | Metric<Date | number, string>
+          | NumericMetric<string>
+          | WeatherDescriptions
+          | WindDataMetric
+          | UVDataMetric;
       }
     });
   }
