@@ -16,6 +16,7 @@ import {
   StructureWeatherData,
   WeatherData,
   ErrorType,
+  MessageType,
 } from "../types/weatherTypes";
 import { BASE_URL, WEATHER_CONSTANTS } from "../utils/constants";
 
@@ -36,22 +37,43 @@ const mockWeatherData: WeatherData = {
   },
 };
 
-function isStructureWeatherData(data: any): data is StructureWeatherData {
-  return data && typeof data === "object" && "timezone" in data;
+/**
+ * Verifica si los datos tienen la estructura de StructureWeatherData.
+ */
+function isStructureWeatherData(data: unknown): data is StructureWeatherData {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+  return (
+    "latitude" in data &&
+    "longitude" in data &&
+    "timezone" in data &&
+    "currentDay" in data &&
+    "pastDay" in data &&
+    "forecast" in data
+  );
 }
 
-interface MockResponseData extends StructureWeatherData {}
+/**
+ * Tipo de datos de respuesta simulada.
+ */
+type MockResponseData = StructureWeatherData;
 
+/**
+ * Configuración del servidor de pruebas con msw.
+ */
 const server = setupServer(
-  http.get<{}, MockResponseData>(BASE_URL, () => {
+  http.get<object, MockResponseData>(BASE_URL, () => {
     return HttpResponse.json(mockWeatherData);
   }),
 );
 
+// Configuración y limpieza del servidor de pruebas
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
+// Descripción de los tests para fetchWeather
 describe("fetchWeather", () => {
   const mockFetchProps: FetchWeatherProps = {
     latitude: 40.7128,
@@ -66,8 +88,12 @@ describe("fetchWeather", () => {
     const weatherData = await fetchWeather(mockFetchProps);
 
     if (isStructureWeatherData(weatherData)) {
-      expect(weatherData?.timezone).toBe(WEATHER_CONSTANTS.DEFAULT_TIMEZONE);
-      expect(weatherData?.currentDay?.hourly?.length).toBeGreaterThan(0);
+      expect(weatherData.latitude).toBe(mockWeatherData.latitude);
+      expect(weatherData.longitude).toBe(mockWeatherData.longitude);
+      expect(weatherData.timezone).toBe(mockWeatherData.timezone);
+      expect(weatherData.currentDay.hourly).not.toBeUndefined();
+      expect(weatherData.pastDay.length).toBe(0);
+      expect(weatherData.forecast.length).toBe(0);
     } else {
       fail("The data is not a StructureWeatherData object.");
     }
@@ -92,7 +118,8 @@ describe("fetchWeather", () => {
         "Debido a un problema en el servidor, no podemos obtener la información del clima.",
       info: "Por favor, inténtalo de nuevo más tarde.",
       status: 500,
-      type: ErrorType.ERROR,
+      type: MessageType.ERROR,
+      errorType: ErrorType.API_ERROR,
     });
   });
 
@@ -118,7 +145,8 @@ describe("fetchWeather", () => {
       error: "La solicitud ha tardado demasiado tiempo en completarse.",
       status: 408,
       info: "Revisa tu conexión a internet e intenta de nuevo.",
-      type: ErrorType.WARNING,
+      type: MessageType.WARNING,
+      errorType: ErrorType.NETWORK_ERROR,
     });
   }, 10000);
 });
