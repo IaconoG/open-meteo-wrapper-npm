@@ -102,7 +102,7 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
           );
         } catch (error) {
           const errorMessage =
-            error instanceof Error ? error.message : "Error desconocido";
+            error instanceof Error ? error.message : "Error desconocido.";
 
           set(
             produce((state) => {
@@ -137,7 +137,7 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
         const { data, fetchParams } = get();
         if (!data || !data.timezone || !fetchParams) return;
 
-        const now = new Date().toLocaleString("en-US", {
+        const now = new Date().toLocaleString("es-ES", {
           timeZone: data.timezone,
         });
         const currentDate = new Date(now);
@@ -163,7 +163,7 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
         const timezone = data.timezone;
 
         // Obtener la hora actual en la zona horaria del usuario
-        const currentDate = new Date().toLocaleString("en-US", {
+        const currentDate = new Date().toLocaleString("es-ES", {
           timeZone: timezone,
         });
         // Convertir la fecha a un objeto Date
