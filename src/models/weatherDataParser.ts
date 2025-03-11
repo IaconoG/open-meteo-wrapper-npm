@@ -8,9 +8,9 @@ import {
   WeatherDescriptions,
   WindDataMetric,
   UVDataMetric,
-} from "../types/weatherTypes";
-import { UNITS, WMOWeatherTexts } from "../utils/constants";
-import { getUvRiskLevel, getUvDescription } from "../utils/utils";
+} from "@/types/weatherTypes";
+import { UNITS, WMOWeatherTexts } from "@/utils/constants";
+import { getUvRiskLevel, getUvDescription } from "@/utils/utils";
 
 /**
  * Clase para analizar y estructurar los datos meteorológicos obtenidos de la API.

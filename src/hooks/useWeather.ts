@@ -1,11 +1,11 @@
-import { useWeatherStore } from "../store/useWeatherStore";
+import { useWeatherStore } from "@/store/useWeatherStore";
 import {
   DailyWeatherData,
   FetchError,
   FetchWeatherProps,
   HourlyWeatherData,
   StructureWeatherData,
-} from "../types/weatherTypes";
+} from "@/types/weatherTypes";
 
 /**
  * Definición de las funciones disponibles para el hook useWeather

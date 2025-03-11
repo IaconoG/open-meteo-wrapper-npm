@@ -2,7 +2,7 @@ import {
   DailyParams,
   HourlyParams,
   WeatherDescriptions,
-} from "../types/weatherTypes";
+} from "@/types/weatherTypes";
 
 /**
  * URL base para las solicitudes de datos meteorológicos.

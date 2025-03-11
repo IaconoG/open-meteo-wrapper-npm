@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { produce } from "immer";
-import { fetchWeather } from "../services/weatherService";
+import { fetchWeather } from "@/services/weatherService";
 import {
   DailyWeatherData,
   FetchWeatherProps,
@@ -11,7 +11,7 @@ import {
   ErrorType,
   MessageType,
   ErrorInitialState,
-} from "../types/weatherTypes";
+} from "@/types/weatherTypes";
 
 /**
  * Definición del estado de la store de datos meteorológicos

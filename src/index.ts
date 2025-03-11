@@ -2,13 +2,13 @@
  * @module hooks/useWeather
  * Este módulo contiene el hook personalizado `useWeather` que permite obtener datos meteorológicos.
  */
-export { useWeather } from "../src/hooks/useWeather";
+export { useWeather } from "@/hooks/useWeather";
 
 /**
  * @module services/weatherService
  * Este módulo contiene la función `fetchWeather` que permite obtener datos meteorológicos.
  */
-export { fetchWeather } from "../src/services/weatherService";
+export { fetchWeather } from "@/services/weatherService";
 
 /**
  * @module types/weatherTypes
@@ -21,7 +21,7 @@ export type {
   StructureWeatherData,
   DailyWeatherData,
   HourlyWeatherData,
-} from "../src/types/weatherTypes";
+} from "@/types/weatherTypes";
 
 /**
  * @module types/weatherTypes
@@ -33,4 +33,4 @@ export {
   DailyParams,
   WeatherDescriptions,
   UvRiskLevels,
-} from "../src/types/weatherTypes";
+} from "@/types/weatherTypes";

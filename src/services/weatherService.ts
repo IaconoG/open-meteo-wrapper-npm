@@ -1,4 +1,4 @@
-import { BASE_URL } from "../utils/constants";
+import { BASE_URL } from "@/utils/constants";
 import {
   FetchWeatherProps,
   WeatherData,
@@ -6,9 +6,9 @@ import {
   FetchError,
   ErrorType,
   MessageType,
-} from "../types/weatherTypes";
-import { WEATHER_CONSTANTS } from "../utils/constants";
-import { WeatherDataParser } from "../models/weatherDataParser";
+} from "@/types/weatherTypes";
+import { WEATHER_CONSTANTS } from "@/utils/constants";
+import { WeatherDataParser } from "@/models/weatherDataParser";
 
 // Función para obtener datos meteorológicos de una API
 export const fetchWeather = async ({
