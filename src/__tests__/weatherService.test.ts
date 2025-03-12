@@ -78,8 +78,8 @@ describe("fetchWeather", () => {
   const mockFetchProps: FetchWeatherProps = {
     latitude: 40.7128,
     longitude: -74.006,
-    hourly: [HourlyParams.Temperature2m],
-    daily: [DailyParams.Temperature2mMax, DailyParams.Temperature2mMin],
+    hourly: [HourlyParams.Temperature],
+    daily: [DailyParams.TemperatureMax, DailyParams.TemperatureMin],
     timezone: WEATHER_CONSTANTS.DEFAULT_TIMEZONE,
     forecast_days: 1,
   };

@@ -40,9 +40,9 @@ export const ErrorInitialState: FetchError = {
 
 // Parámetros meteorológicos disponibles en datos por hora
 export enum HourlyParams {
-  Temperature2m = "temperature_2m", // En grados Celsius ºC
-  RelativeHumidity2m = "relative_humidity_2m", // En porcentaje %
-  DewPoint2m = "dew_point_2m", // En grados Celsius ºC (Punto rocio)
+  Temperature = "temperature_2m", // En grados Celsius ºC
+  RelativeHumidity = "relative_humidity_2m", // En porcentaje %
+  DewPoint = "dew_point_2m", // En grados Celsius ºC (Punto rocio)
   ApparentTemperature = "apparent_temperature", // En grados Celsius ºC (Sensación térmica)
   PrecipitationProbability = "precipitation_probability", // En porcentaje %
   Precipitation = "precipitation", // En milímetros mm
@@ -53,16 +53,16 @@ export enum HourlyParams {
   PressureMsl = "pressure_msl", // En hectopascales hPa
   CloudCover = "cloud_cover", // En porcentaje %
   Visibility = "visibility", // En metros m
-  WindSpeed10m = "wind_speed_10m", // En kilometros por hora km/h
-  WindDirection10m = "wind_direction_10m", // En grados
+  WindSpeed = "wind_speed_10m", // En kilometros por hora km/h
+  WindDirection = "wind_direction_10m", // En grados
   UvIndex = "uv_index", // Índice UV
   IsDay = "is_day", // Indica si es de día o de noche (1: día, 0: noche)
 }
 
 // Parámetros meteorológicos disponibles en datos diarios
 export enum DailyParams {
-  Temperature2mMax = "temperature_2m_max",
-  Temperature2mMin = "temperature_2m_min",
+  TemperatureMax = "temperature_2m_max",
+  TemperatureMin = "temperature_2m_min",
   Sunrise = "sunrise",
   Sunset = "sunset",
   DaylightDuration = "daylight_duration",
@@ -94,7 +94,7 @@ export interface WeatherData {
     Record<
       Exclude<
         HourlyParams,
-        HourlyParams.Temperature2m | HourlyParams.WeatherCode
+        HourlyParams.Temperature | HourlyParams.WeatherCode
       >,
       number[]
     >
@@ -111,12 +111,12 @@ export interface WeatherData {
 
 // Estructura global con datos meteorológicos organizados
 export interface StructureWeatherData {
-  pastDay: DailyWeatherData[];
-  currentDay: DailyWeatherData;
-  forecast: DailyWeatherData[];
   latitude: number;
   longitude: number;
   timezone: string;
+  pastDay: DailyWeatherData[];
+  currentDay: DailyWeatherData;
+  forecast: DailyWeatherData[];
 }
 
 // Representa el tipo base para los datos meteorológicos
