@@ -1,70 +1,56 @@
-# Weather-NPM
+# Open Meteo Wrapper
 
-Este paquete npm proporciona componentes React para mostrar información del clima en tres vistas diferentes:
+## Tabla de Contenidos
 
-- **Vista reducida:** Muestra un icono, temperatura y descripción del clima.
-- **Vista básica:** Incluye la vista reducida más información sobre viento, humedad, sensación térmica, visibilidad e índice UV.
-- **Vista completa:** Próximamente disponible.
+- [Descripción](#descripción)
+- [Instalación](#instalación)
+- [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [Documentación](#documentación)
+- [Contribución](#contribución)
+- [Licencia](#licencia)
+
+## Descripción
+
+Este paquete de npm permite obtener datos meteorológicos de la API [Open-Meteo](https://open-meteo.com) de forma sencilla.
+El paquete exporta:
+
+- Un **hook `useWeather`** que utiliza un almacenamiento global con Zustand.
+- Un **servicio `fetchWeather`** que permite obtener datos meteorológicos directamente desde la API Open-Meteo.
+
+El usuario puede optar por utilizar el hook `useWeather` o el servicio `fetchWeather` según sus necesidades.
 
 ## Instalación
 
-```sh
-npm install weather-npm
+```bash
+npm install @giann/open-meteo-wrapper
 ```
 
-## Uso
-
-Importa y utiliza los componentes en tu aplicación:
-
-```tsx
-import { WeatherMinimal, WeatherBasic } from "weather-npm";
-
-function App() {
-  return (
-    <div>
-      <WeatherMinimal location="Madrid, España" />
-      <WeatherBasic location="Buenos Aires, Argentina" />
-    </div>
-  );
-}
-```
-
-## Tecnologías utilizadas
+## Tecnologías Utilizadas
 
 El paquete está desarrollado con las siguientes tecnologías:
 
-- **Vite**: Herramienta de desarrollo rápida para proyectos de React y TypeScript.
-- **React**: Biblioteca para la construcción de interfaces de usuario.
-- **TypeScript**: Aporta tipado estático a JavaScript, mejorando la seguridad del código.
-- **Material-UI**: Proporciona componentes estilizados y personalizables para la interfaz.
-- **Jest**: Framework de testing para verificar el correcto funcionamiento de la API y los componentes.
+- [Open-Meteo](https://open-meteo.com) - Fuente de datos meteorológicos
+- [TypeScript](https://www.typescriptlang.org/) - Tipado estático y desarrollo
+- [Zustand](https://zustand.surge.sh/) - Almacenamiento global de estado
+- [Vite](https://vitejs.dev/) - Entorno de desarrollo rápido
+- [Jest](https://jestjs.io/) - Pruebas unitarias
 
-## Desarrollo
+## Documentación
 
-Para clonar y probar el paquete localmente:
+Para obtener más detalles sobre el uso del paquete, consulta la documentación:
 
-```sh
-git clone https://github.com/usuario/weather-npm.git
-cd weather-npm
-npm install
-npm run dev
-```
+- **[Guía de Uso](./docs/usage.md)**: Cómo utilizar `useWeather` y `fetchWeather`.
+- **Referencia de la API**: Explicación detallada de los hooks, funciones y servicios disponibles.
 
-## Tests
+  - [useWeather](./docs/api-reference/useWeather.md)
+  - [useWeatherStore](./docs/api-reference/useWeatherStore.md)
+  - [fetchWeatherService](./docs/api-reference/fetchWeatherService.md)
 
-Ejecuta las pruebas con:
+- **[Tipos Exportados](./docs/types.md)**: Definición de los tipos de datos utilizados en el paquete.
 
-```sh
-npm run test
-```
+## Contribución
 
-## Publicación
-
-Para publicar el paquete en npm:
-
-```sh
-npm publish --access private
-```
+Si deseas contribuir al proyecto, por favor abre un issue o un pull request en el repositorio de GitHub.
 
 ## Licencia
 
