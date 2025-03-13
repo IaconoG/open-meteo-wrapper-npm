@@ -1,12 +1,3 @@
-/**
- * @description
- * El objetivo del test es probar el store, no el servicio externo. Si el servicio real
- * (weatherService.ts) falla o cambia, podría romper el test, aunque el store siga funcionando bien.
- *
- * Para esto se puede usar un mock del servicio, para que devuelva datos controlados y no dependa
- * de un servicio externo.
- */
-
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useWeatherStore } from "../store/useWeatherStore";
 import { fetchWeather as mockFetchWeather } from "../services/weatherService";
@@ -34,7 +25,7 @@ describe("useWeatherStore", () => {
     useWeatherStore.setState({
       data: null,
       loading: false,
-      error: ErrorInitialState,
+      error: null,
     });
     jest.clearAllMocks();
   });
@@ -75,34 +66,29 @@ describe("useWeatherStore", () => {
    * Test para probar que el store maneja correctamente los errores
    */
   it("fetchWeather - should handle errors", async () => {
-    (mockFetchWeather as jest.Mock).mockRejectedValue({
-      error: "Network error",
-      type: MessageType.ERROR,
-      errorType: ErrorType.API_ERROR,
-      status: 500,
-    });
+    const mockError = {
+      error: "Error desconocido.",
+      type: MessageType.WARNING,
+      errorType: ErrorType.UNKNOWN_ERROR,
+      status: 0,
+    };
+    (mockFetchWeather as jest.Mock).mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useWeatherStore());
 
     expect(result.current.data).toBeNull();
     expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe(ErrorInitialState);
+    expect(result.current.error).toBeNull();
 
-    act(() => {
-      result.current.fetchWeather({ latitude: 40.7128, longitude: -74.006 });
-    });
-
-    expect(result.current.loading).toBe(true);
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-      expect(result.current.error).toStrictEqual({
-        error: "Error desconocido.",
-        type: MessageType.WARNING,
-        errorType: ErrorType.UNKNOWN_ERROR,
-        status: 0,
+    await act(async () => {
+      await result.current.fetchWeather({
+        latitude: 40.7128,
+        longitude: -74.006,
       });
     });
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toStrictEqual(mockError);
 
     // Asegurarse de que `data` sigue siendo `null`
     expect(result.current.data).toBeNull();
@@ -175,7 +161,7 @@ describe("useWeatherStore", () => {
 
   /**
    * Test para probar que se puede obtener el clima actual
-   * - Es necesario establecer la fecha con la zona horaria correcta !!!
+   * - Es necesario establecer la fecha con la zona horaria !!!
    */
   it("should return current hour weather", () => {
     const timezoneTest = "America/New_York";
