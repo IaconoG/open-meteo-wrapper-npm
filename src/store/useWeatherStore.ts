@@ -13,91 +13,109 @@ import {
   ErrorInitialState,
 } from "@/types/weatherTypes";
 
-/**
- * Definición del estado de la store de datos meteorológicos
- */
 interface WeatherState {
   data: StructureWeatherData | null;
   loading: boolean;
   error: FetchError | null;
-  autoRefresh: boolean; // Opción por defecto
+  autoRefresh: boolean;
   fetchParams: FetchWeatherProps | null;
+  // Variables de caché
+  lastFetchTime: number | null;
+  cacheDuration: number;
 }
 
-/**
- * Definición de las acciones disponibles en la store de datos meteorológicos
- */
 interface WeatherActions {
-  //Acción para obtener los datos meteorológicos
   fetchWeather: (params: FetchWeatherProps) => Promise<void>;
-
-  //Función para verificar si está cargando
   isLoading: () => boolean;
-  //Función para verificar si hay un error
   hasError: () => boolean;
-  //Función para obtener el error
   getError: () => FetchError | null;
-  //Función para limpiar el error
   clearError: () => void;
-
-  // Función para obtener el estado de la actualización automática
-  setAutoRefresh: (value: boolean) => void; // Acción para configurar el refresco automático
-  // Función para programar la actualización de los datos meteorológicos automáticamente
-  scheduleAutoRefresh: () => void; // Acción para programar el refresco automático
-
-  //Función para obtener todos los datos meteorológicos
+  setAutoRefresh: (value: boolean) => void;
+  scheduleAutoRefresh: () => void;
   getAllWeatherData: () => StructureWeatherData | null;
-  //Función para obtener los datos meteorológicos del día actual
   getCurrentDayWeather: () => DailyWeatherData | null;
-  //Función para obtener los datos meteorológicos de días pasados
   getPastDayWeather: () => DailyWeatherData[] | null;
-  //Función para obtener los datos meteorológicos del pronóstico
   getForecastWeather: () => DailyWeatherData[] | null;
-
-  //Función para obtener los datos meteorológicos de la hora actual
   getCurrentHourWeather: () => HourlyWeatherData | null;
 }
 
 /**
- * Creación de la store de datos meteorológicos utilizando Zustand
+ * @param a Primer objeto de parámetros de solicitud.
+ * @param b Segundo objeto de parámetros de solicitud.
+ * @returns Devuelve true si los parámetros de solicitud son iguales.
  */
+function areFetchParamsEqual(a: FetchWeatherProps, b: FetchWeatherProps) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export const useWeatherStore = create<WeatherState & WeatherActions>()(
   persist(
     (set, get) => ({
       data: null,
       loading: false,
       error: null,
-      autoRefresh: true, // Opción por defecto
+      autoRefresh: true,
       fetchParams: null,
 
+      // Variables de caché
+      lastFetchTime: null,
+      cacheDuration: 10 * 60 * 1000, // 10 minutos por defecto
+
+      /**
+       * Realiza la solicitud para obtener datos meteorológicos.
+       * Primero revisa si los parámetros son los mismos usados la última vez,
+       * si ya existe data, y si no ha pasado el tiempo suficiente (cacheDuration).
+       * Si todo se cumple, no hace un nuevo fetch.
+       */
       fetchWeather: async (params) => {
+        const state = get();
+        const now = Date.now();
+
+        // 1) Verifica si los parámetros no han cambiado
+        // 2) Verifica si ya existe data previa
+        // 3) Verifica si la última solicitud está dentro del rango de caché
+        const canUseCachedData =
+          state.fetchParams &&
+          areFetchParamsEqual(state.fetchParams, params) &&
+          state.data &&
+          state.lastFetchTime !== null &&
+          now - state.lastFetchTime < state.cacheDuration;
+
+        if (canUseCachedData) {
+          console.log("Usando datos en caché");
+          return;
+        }
+
+        // Establece el estado de carga y limpia cualquier error previo
         set(
-          produce((state) => {
-            state.loading = true;
-            state.error = ErrorInitialState;
-            state.fetchParams = params;
+          produce((draft) => {
+            draft.loading = true;
+            draft.error = ErrorInitialState;
+            draft.fetchParams = params;
           }),
         );
 
         try {
           const result = await fetchWeather(params);
 
+          // Verifica si la respuesta contiene un error
           if ("error" in (result as FetchError)) {
             set(
-              produce((state) => {
-                state.error = result as FetchError;
-                state.loading = false;
+              produce((draft) => {
+                draft.error = result as FetchError;
+                draft.loading = false;
               }),
             );
             return;
           }
 
-          const data = result as StructureWeatherData;
+          // Actualiza el estado con los datos obtenidos y la hora del fetch
           set(
-            produce((state) => {
-              state.data = data;
-              state.loading = false;
-              state.error = null;
+            produce((draft) => {
+              draft.data = result as StructureWeatherData;
+              draft.loading = false;
+              draft.error = null;
+              draft.lastFetchTime = Date.now(); // Cacheamos la hora de esta respuesta
             }),
           );
         } catch (error) {
@@ -105,34 +123,50 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
             error instanceof Error ? error.message : "Error desconocido.";
 
           set(
-            produce((state) => {
-              state.error = {
+            produce((draft) => {
+              draft.error = {
                 error: errorMessage,
                 type: MessageType.WARNING,
                 errorType: ErrorType.UNKNOWN_ERROR,
-                status: 0, // Status 0 para errores desconocidos
+                status: 0,
               };
-              state.loading = false;
+              draft.loading = false;
             }),
           );
         }
       },
 
+      // Verifica si está en proceso de carga
       isLoading: () => get().loading,
+
+      // Verifica si se ha producido algún error
       hasError: () => get().error !== null,
+
+      // Obtiene el error actual
       getError: () => get().error,
+
+      // Limpia el error
       clearError: () =>
         set(
-          produce((state) => {
-            state.error = null;
+          produce((draft) => {
+            draft.error = null;
           }),
         ),
 
+      /**
+       * Activa o desactiva la actualización automática.
+       * Al activarse, programa una llamada a scheduleAutoRefresh().
+       */
       setAutoRefresh: (value) => {
         set({ autoRefresh: value });
         if (value) get().scheduleAutoRefresh();
       },
 
+      /**
+       * Programa una actualización automática de datos para la medianoche local
+       * en la zona horaria de los datos obtenidos, y vuelve a programarla
+       * cada vez que se llega a esa hora.
+       */
       scheduleAutoRefresh: () => {
         const { data, fetchParams } = get();
         if (!data || !data.timezone || !fetchParams) return;
@@ -148,26 +182,26 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
 
         setTimeout(async () => {
           await get().fetchWeather(fetchParams);
-          get().scheduleAutoRefresh(); // Reprogramar para la próxima medianoche
+          get().scheduleAutoRefresh();
         }, timeToMidnight);
       },
 
+      // Métodos para obtener datos concretos
       getAllWeatherData: () => get().data,
       getCurrentDayWeather: () => get().data?.currentDay || null,
       getPastDayWeather: () => get().data?.pastDay || null,
       getForecastWeather: () => get().data?.forecast || null,
+
+      // Devuelve los datos meteorológicos de la hora actual
       getCurrentHourWeather() {
         const { data } = get();
         if (!data) return null;
 
         const timezone = data.timezone;
-
-        // Obtener la hora actual en la zona horaria del usuario
-        const currentDate = new Date().toLocaleString("es-ES", {
+        const currentLocaleString = new Date().toLocaleString("en", {
           timeZone: timezone,
         });
-        // Convertir la fecha a un objeto Date
-        const currentHour = new Date(currentDate);
+        const currentHour = new Date(currentLocaleString);
 
         // Buscar el pronóstico de la hora actual
         const currentHourWeather = data.currentDay?.hourly?.find((hour) => {
@@ -179,15 +213,12 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
       },
     }),
     {
-      name: "weather-store", // nombre de la store en el almacenamiento local
+      name: "weather-store",
     },
   ),
 );
 
-/**
- * Programar la actualización automática si está habilitada
- * Se ejecuta al cargar la aplicación
- */
+// Programar la actualización automática en la carga de la aplicación
 if (useWeatherStore.getState().autoRefresh) {
   useWeatherStore.getState().scheduleAutoRefresh();
 }
