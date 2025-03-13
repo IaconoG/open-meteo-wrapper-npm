@@ -1,9 +1,3 @@
-// Representa una ubicación geográfica con latitud y longitud.
-export interface Location {
-  readonly lat: number;
-  readonly lng: number;
-}
-
 // Tipos de mensajes de la API
 export enum MessageType {
   SUCCESS = "success",
