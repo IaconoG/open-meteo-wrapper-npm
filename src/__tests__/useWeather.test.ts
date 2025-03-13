@@ -210,4 +210,70 @@ describe("useWeatherStore", () => {
     expect(result.current.getForecastWeather()).toBeNull();
     expect(result.current.getCurrentHourWeather()).toBeNull();
   });
+
+  it("should not fetch if cached data is still valid", async () => {
+    (mockFetchWeather as jest.Mock).mockResolvedValue({
+      latitude: 40.7128,
+      longitude: -74.006,
+    });
+
+    const now = Date.now();
+    // Establecer un tiempo de última obtención reciente
+    useWeatherStore.setState({
+      data: {
+        latitude: 40.7128,
+        longitude: -74.006,
+        timezone: "America/New_York",
+        currentDay: {},
+        pastDay: [],
+        forecast: [],
+      },
+      lastFetchTime: now, // asumiendo que la lógica interna se basa en lastFetchTime
+    });
+
+    const { result } = renderHook(() => useWeatherStore());
+
+    await act(async () => {
+      await result.current.fetchWeather({
+        latitude: 40.7128,
+        longitude: -74.006,
+      });
+    });
+
+    // Si lastFetchTime está dentro del rango de validez, no debería invocar el servicio
+    expect(mockFetchWeather).not.toHaveBeenCalled();
+  });
+
+  it("should fetch new data if cached data is expired", async () => {
+    (mockFetchWeather as jest.Mock).mockResolvedValue({
+      latitude: 40.7128,
+      longitude: -74.006,
+    });
+
+    // Establecer un tiempo de última obtención lejano para forzar la expiración
+    useWeatherStore.setState({
+      data: {
+        latitude: 40.7128,
+        longitude: -74.006,
+        timezone: "America/New_York",
+        currentDay: {},
+        pastDay: [],
+        forecast: [],
+      },
+
+      lastFetchTime: Date.now() - 1000 * 60 * 60 * 24, // 24 horas atrás
+    });
+
+    const { result } = renderHook(() => useWeatherStore());
+
+    await act(async () => {
+      await result.current.fetchWeather({
+        latitude: 40.7128,
+        longitude: -74.006,
+      });
+    });
+
+    // En este caso, sí debería llamar al servicio
+    expect(mockFetchWeather).toHaveBeenCalledTimes(1);
+  });
 });
