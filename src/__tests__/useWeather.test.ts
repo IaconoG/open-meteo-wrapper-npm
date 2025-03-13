@@ -188,7 +188,7 @@ describe("useWeatherStore", () => {
           {
             hour: {
               value: new Date(
-                new Date().toLocaleString("es-ES", {
+                new Date().toLocaleString("en", {
                   timeZone: timezoneTest,
                 }),
               ),
