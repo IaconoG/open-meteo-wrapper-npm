@@ -7,10 +7,10 @@ import { uvDescriptions } from "./constants";
  * @returns Nivel de riesgo UV.
  */
 export const getUvRiskLevel = (index: number): UvRiskLevels => {
-  if (index < 0) return UvRiskLevels.unknown;
-  if (index <= 2) return UvRiskLevels.low;
-  if (index <= 7) return UvRiskLevels.moderate;
-  return UvRiskLevels.high;
+  if (index < 0) return UvRiskLevels.UNKNOWN;
+  if (index <= 2) return UvRiskLevels.LOW;
+  if (index <= 7) return UvRiskLevels.MODERATE;
+  return UvRiskLevels.HIGH;
 };
 
 /**
@@ -19,8 +19,8 @@ export const getUvRiskLevel = (index: number): UvRiskLevels => {
  * @returns Descripción del riesgo UV.
  */
 export const getUvDescription = (index: number): string => {
-  if (index < 0) return uvDescriptions.unknown;
-  if (index <= 2) return uvDescriptions.low;
-  if (index <= 7) return uvDescriptions.moderate;
-  return uvDescriptions.high;
+  if (index < 0) return uvDescriptions.UNKNOWN;
+  if (index <= 2) return uvDescriptions.LOW;
+  if (index <= 7) return uvDescriptions.MODERATE;
+  return uvDescriptions.HIGH;
 };
