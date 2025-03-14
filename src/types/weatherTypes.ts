@@ -122,8 +122,8 @@ export type NumericMetric<U extends string = ""> = Metric<number, U>;
 
 // Datos del viento
 export interface WindDataMetric {
-  speed: NumericMetric<"km/h"> | { value: undefined; unit: "km/h" };
-  direction?: NumericMetric<"º"> | { value: undefined; unit: "º" };
+  speed: NumericMetric<"km/h">;
+  direction?: NumericMetric<"º">;
 }
 
 // Datos del índice UV
