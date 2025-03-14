@@ -82,7 +82,7 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
           now - state.lastFetchTime < state.cacheDuration;
 
         if (canUseCachedData) {
-          console.log("Usando datos en caché");
+          // No se necesita hacer una nueva solicitud, usar datos en caché
           return;
         }
 
