@@ -32,12 +32,14 @@ export const WEATHER_CONSTANTS = {
   8 and above   | Avoid being outside during midday hours. 
                 | Make sure you seek shade. Shirt, sunscreen and hat are a must  
 */
-export const uvDescriptions: Record<string, string> = {
-  unknown: "No se puede determinar el riesgo de exposición",
-  low: "Puedes disfrutar de estar afuera con seguridad",
-  moderate:
+type riskLevels = "UNKNOWN" | "LOW" | "MODERATE" | "HIGH";
+
+export const uvDescriptions: Record<riskLevels, string> = {
+  UNKNOWN: "No se puede determinar el riesgo de exposición",
+  LOW: "Puedes disfrutar de estar afuera con seguridad",
+  MODERATE:
     "Busca sombra durante las horas del mediodía. Ponte una remera, utiliza protector solar y un sombrero.",
-  high: "Evita estar afuera durante las horas del mediodía. Asegúrate de buscar sombra. La remera, el protector solar y el sombrero son imprescindibles.",
+  HIGH: "Evita estar afuera durante las horas del mediodía. Asegúrate de buscar sombra. La remera, el protector solar y el sombrero son imprescindibles.",
 } as const;
 
 /**
