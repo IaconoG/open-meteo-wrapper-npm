@@ -78,7 +78,7 @@ getWeather();
 
 ## Contribución
 
-Si deseas contribuir al proyecto, por favor abre un issue o un pull request en el repositorio de GitHub.
+Si deseas contribuir al proyecto, por favor abre un issue o un pull request en el repositorio de GitHub (https://github.com/IaconoG/open-meteo-wrapper-npm)
 
 ## Licencia
 
