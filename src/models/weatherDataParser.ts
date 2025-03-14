@@ -157,8 +157,7 @@ export class WeatherDataParser {
 
       const dataMap: Record<
         string,
-        | Metric<Date | number, string>
-        | NumericMetric<string>
+        | Metric<Date | number | WeatherDescriptions, string>
         | WeatherDescriptions
         | WindDataMetric
         | UVDataMetric
@@ -173,7 +172,10 @@ export class WeatherDataParser {
           value: weather_code?.[i],
           unit: UNITS.weather_code,
         } as NumericMetric<"wmo code">,
-        weatherDescription: WMOWeatherTexts[weather_code?.[i]],
+        weatherDescription: {
+          value: WMOWeatherTexts[weather_code?.[i]],
+          unit: "text",
+        } as Metric<WeatherDescriptions, "text">,
         relativeHumidity: {
           value: relative_humidity_2m?.[i],
           unit: UNITS.relative_humidity_2m,
@@ -217,7 +219,7 @@ export class WeatherDataParser {
         } as NumericMetric<"km">,
         uv: {
           value: uv_index?.[i],
-          unit: "",
+          unit: "text",
           riskLevel: getUvRiskLevel(uv_index?.[i] ?? 0),
           description: getUvDescription(uv_index?.[i] ?? 0),
         } as UVDataMetric,
@@ -249,7 +251,7 @@ export class WeatherDataParser {
     target: Partial<DailyWeatherData> | HourlyWeatherData,
     dataMap: Record<
       string,
-      | Metric<Date | number, string>
+      | Metric<Date | number | WeatherDescriptions, string>
       | NumericMetric<string>
       | WeatherDescriptions
       | HourlyWeatherData[]
@@ -267,13 +269,11 @@ export class WeatherDataParser {
         (value as WindDataMetric).direction?.value !== undefined
       ) {
         (target as HourlyWeatherData)[key] = value as WindDataMetric;
-      } else if (key == "weatherDescription" && value !== undefined) {
-        (target as HourlyWeatherData)[key] = value as WeatherDescriptions;
       } else if (key === "hourly" && value) {
         (target as DailyWeatherData)[key] = value as HourlyWeatherData[];
       } else if (value && (value as Metric<Date | number, string>).value) {
         (target as DailyWeatherData | HourlyWeatherData)[key] = value as
-          | Metric<Date | number, string>
+          | Metric<Date | number | WeatherDescriptions, string>
           | NumericMetric<string>
           | WeatherDescriptions
           | WindDataMetric
