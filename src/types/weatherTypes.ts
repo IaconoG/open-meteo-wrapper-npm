@@ -129,9 +129,9 @@ export interface WindDataMetric {
 // Datos del índice UV
 export interface UVDataMetric {
   value: number;
-  riskLevel: string;
+  riskLevel: UvRiskLevels;
   description: string;
-  unit: "";
+  unit: "text";
 }
 
 // Representa la información meteorológica de un día específico
@@ -161,7 +161,7 @@ export interface HourlyWeatherData {
   snowfall?: NumericMetric<"cm">;
   snowDepth?: NumericMetric<"m">;
   weatherCode?: NumericMetric<"wmo code">;
-  weatherDescription?: WeatherDescriptions;
+  weatherDescription?: Metric<WeatherDescriptions, "text">;
   pressureMsl?: NumericMetric<"hPa">;
   cloudCover?: NumericMetric<"%">;
   visibility?: NumericMetric<"km">;
@@ -172,10 +172,10 @@ export interface HourlyWeatherData {
 
 // Niveles de riesgo del índice UV
 export enum UvRiskLevels {
-  unknown = "Desconocido",
-  low = "Bajo",
-  moderate = "Moderado",
-  high = "Alto",
+  UNKNOWN = "Desconocido",
+  LOW = "Bajo",
+  MODERATE = "Moderado",
+  HIGH = "Alto",
 }
 
 /** Relación entre códigos WMO y su descripción meteorológica correspondiente.
