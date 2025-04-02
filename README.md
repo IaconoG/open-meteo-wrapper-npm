@@ -8,6 +8,8 @@ Tabla de Contenidos
   - [Tecnologías Utilizadas](#tecnologías-utilizadas)
   - [Documentación](#documentación)
   - [Ejemplo de Uso](#ejemplo-de-uso)
+    - [Uso del hook `useWeather`](#uso-del-hook-useweather)
+    - [Uso del servicio `fetchWeather`](#uso-del-servicio-fetchweather)
   - [Contribución](#contribución)
   - [Licencia](#licencia)
 
@@ -47,34 +49,51 @@ Para obtener más detalles sobre el uso del paquete, consulta la documentación:
 
 ## Ejemplo de Uso
 
+A continuación, ejemplos básicos de cómo usar el hook `useWeather` y el servicio `fetchWeather`:
+
+### Uso del hook `useWeather`
+
 ```typescript
-import { useWeather, fetchWeatherService } from "@giann/open-meteo-wrapper";
+import { useWeather } from "@giann/open-meteo-wrapper";
 
-// Usando el hook useWeather
-const WeatherComponent = () => {
-  const { weather, fetchWeather } = useWeather();
-  const location = { lat: 40.7128, lon: -74.006 };
-
-  useEffect(() => {
-    fetchWeather(location.lat, location.lon);
-  }, []);
+function WeatherComponent() {
+  const { weatherData, fetchWeather } = useWeather();
 
   return (
     <div>
-      <h1>Weather in New York</h1>
-      <pre>{JSON.stringify(weather, null, 2)}</pre>
+      <button
+        onClick={() => fetchWeather({ latitude: 40.7128, longitude: -74.006 })}
+      >
+        Obtener Clima
+      </button>
+      {weatherData && (
+        <div>
+          <p>Temperatura: {weatherData.temperature}°C</p>
+          <p>Condición: {weatherData.condition}</p>
+        </div>
+      )}
     </div>
   );
-};
+}
+```
 
-// Usando el servicio fetchWeatherService
-const getWeather = async () => {
-  const weatherData = await fetchWeatherService(location.lat, location.lon);
+### Uso del servicio `fetchWeather`
+
+```typescript
+import { fetchWeather } from "@giann/open-meteo-wrapper";
+
+async function getWeather() {
+  const weatherData = await fetchWeather({
+    latitude: 40.7128,
+    longitude: -74.006,
+  });
   console.log(weatherData);
-};
+}
 
 getWeather();
 ```
+
+Para más ejemplos y casos de uso avanzados, consulta la [Guía de Uso](./docs/usage.md).
 
 ## Contribución
 
