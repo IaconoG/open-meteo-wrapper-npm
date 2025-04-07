@@ -1,10 +1,11 @@
 {
   "name": "@giann/open-meteo-wrapper",
-  "private": true,
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IaconoG/open-meteo-wrapper-npm.git"
+  },
   "description": "A weather app using open-meteo API",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "keywords": [
     "weather",
     "open-meteo",
@@ -12,6 +13,10 @@
     "zustand",
     "vite"
   ],
+  "private": true,
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "dev": "vite",
