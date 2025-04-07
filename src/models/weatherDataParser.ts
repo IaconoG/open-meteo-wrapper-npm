@@ -8,7 +8,7 @@ import {
   WeatherDescriptions,
   WindDataMetric,
   UVDataMetric,
-} from "@/types/weatherTypes";
+} from "@/_types/weatherTypes";
 import { UNITS, WMOWeatherTexts } from "@/utils/constants";
 import { getUvRiskLevel, getUvDescription } from "@/utils/utils";
 
@@ -271,7 +271,11 @@ export class WeatherDataParser {
         (target as HourlyWeatherData)[key] = value as WindDataMetric;
       } else if (key === "hourly" && value) {
         (target as DailyWeatherData)[key] = value as HourlyWeatherData[];
-      } else if (value && (value as Metric<Date | number, string>).value) {
+      } else if (
+        value &&
+        (value as Metric<Date | number, string>).value &&
+        key in target // Ensure the key exists in the target object
+      ) {
         (target as DailyWeatherData | HourlyWeatherData)[key] = value as
           | Metric<Date | number | WeatherDescriptions, string>
           | NumericMetric<string>
