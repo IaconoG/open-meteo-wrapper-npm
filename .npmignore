@@ -1,0 +1,19 @@
+# Excluir archivos innecesarios para el paquete npm
+src/
+tests/
+.vscode/
+*.log
+*.ts
+!dist/
+
+# Excluir configuraciones y archivos de desarrollo
+jest.config.ts
+vite.config.ts
+*.json
+!package.json
+
+# Incluir solo lo necesario
+!dist/**
+!README.md
+!LICENSE
+
