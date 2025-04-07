@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Ignorar archivos de configuración locales
+*.local
+*.env
+
+# Ignorar archivos de salida de compilación
+*.map
