@@ -9,7 +9,6 @@
     "weather",
     "open-meteo",
     "react",
-    "mui",
     "zustand",
     "vite"
   ],
@@ -22,6 +21,11 @@
     "format": "prettier --write .",
     "test": "jest"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "docs"
+  ],
   "dependencies": {
     "@mui/material": "^6.4.4",
     "immer": "^10.1.1",
