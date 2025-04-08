@@ -263,26 +263,28 @@ export class WeatherDataParser {
     Object.keys(dataMap).forEach((key) => {
       const value = dataMap[key];
 
-      if (
-        key === "wind" &&
-        value &&
-        (value as WindDataMetric).direction?.value !== undefined
-      ) {
-        (target as HourlyWeatherData)[key] = value as WindDataMetric;
-      } else if (key === "hourly" && value) {
-        (target as DailyWeatherData)[key] = value as HourlyWeatherData[];
-      } else if (
-        value &&
-        (value as Metric<Date | number, string>).value &&
-        key in target // Ensure the key exists in the target object
-      ) {
-        (target as DailyWeatherData | HourlyWeatherData)[key] = value as
-          | Metric<Date | number | WeatherDescriptions, string>
-          | NumericMetric<string>
-          | WeatherDescriptions
-          | WindDataMetric
-          | UVDataMetric;
+      if (key in target) {
+        if (isDailyWeatherData(target)) {
+          (target as DailyWeatherData)[key as keyof DailyWeatherData] =
+            value as any;
+        } else if (isHourlyWeatherData(target)) {
+          (target as HourlyWeatherData)[key as keyof HourlyWeatherData] =
+            value as any;
+        }
       }
     });
   }
+}
+
+// Funciones de refinamiento de tipos
+function isDailyWeatherData(
+  target: Partial<DailyWeatherData> | HourlyWeatherData,
+): target is DailyWeatherData {
+  return "temperatureMax" in target; // Propiedad específica de DailyWeatherData
+}
+
+function isHourlyWeatherData(
+  target: Partial<DailyWeatherData> | HourlyWeatherData,
+): target is HourlyWeatherData {
+  return "temperature" in target; // Propiedad específica de HourlyWeatherData
 }
