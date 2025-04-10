@@ -21,4 +21,4 @@ export type {
   HourlyParams,
   StructureWeatherData,
   FetchError,
-} from "@/_types/weatherTypes";
+} from "@/types/weatherTypes";

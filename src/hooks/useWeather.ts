@@ -5,7 +5,7 @@ import {
   FetchWeatherProps,
   HourlyWeatherData,
   StructureWeatherData,
-} from "@/_types/weatherTypes";
+} from "@/types/weatherTypes";
 
 /**
  * Definición de las funciones disponibles para el hook useWeather

@@ -11,7 +11,7 @@ import {
   ErrorType,
   MessageType,
   ErrorInitialState,
-} from "@/_types/weatherTypes";
+} from "@/types/weatherTypes";
 
 interface WeatherState {
   data: StructureWeatherData | null;

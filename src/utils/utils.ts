@@ -1,4 +1,4 @@
-import { UvRiskLevels } from "@/_types/weatherTypes";
+import { UvRiskLevels } from "@/types/weatherTypes";
 import { uvDescriptions } from "./constants";
 
 /**

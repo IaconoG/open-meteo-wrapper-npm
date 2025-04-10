@@ -8,7 +8,7 @@ import {
   WeatherDescriptions,
   WindDataMetric,
   UVDataMetric,
-} from "@/_types/weatherTypes";
+} from "@/types/weatherTypes";
 import { UNITS, WMOWeatherTexts } from "@/utils/constants";
 import { getUvRiskLevel, getUvDescription } from "@/utils/utils";
 

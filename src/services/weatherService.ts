@@ -6,7 +6,7 @@ import {
   FetchError,
   ErrorType,
   MessageType,
-} from "@/_types/weatherTypes";
+} from "@/types/weatherTypes";
 import { WEATHER_CONSTANTS } from "@/utils/constants";
 import { WeatherDataParser } from "@/models/weatherDataParser";
 
