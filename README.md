@@ -15,7 +15,7 @@ Tabla de Contenidos
 
 ## Descripción
 
-Este paquete de npm permite obtener datos meteorológicos de la API [Open-Meteo](https://open-meteo.com) de forma sencilla. El paquete exporta un hook `useWeather` que utiliza un almacenamiento global con Zustand y un servicio `fetchWeather` que nos permite obtener datos meteorológicos de la API Open-Meteo. El usuario puede optar por utilizar el hook `useWeather` o el servicio `fetchWeather`.
+Este paquete de npm permite obtener datos meteorológicos de la API [Open-Meteo](https://open-meteo.com) de forma sencilla. El paquete exporta un hook `useWeather` que utiliza un almacenamiento global con Zustand y un servicio `fetchWeather` que nos permite obtener datos meteorológicos de la API Open-Meteo. El usuario puede optar por utilizar tanto el hook como o el servicio.
 
 ## Instalación
 
