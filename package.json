@@ -32,15 +32,11 @@
     "docs"
   ],
   "dependencies": {
-    "immer": "^10.1.1",
-    "react": "^19.0.0",
-    "zustand": "^5.0.3"
+    "immer": "^10.1.1"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "zustand": "^4.0.0",
-    "typescript": "^5.0.0",
-    "immer": "^10.1.1"
+    "react": "^18.0.0 || ^19.0.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
