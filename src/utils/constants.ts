@@ -18,12 +18,15 @@ export const WEATHER_CONSTANTS = {
   /** Zona horaria por defecto para las consultas */
   DEFAULT_TIMEZONE: "America/Sao_Paulo",
   /** Parámetros meteorológicos por hora solicitados por defecto */
-  DEFAULT_HOURLY_PARAMS: ["temperature_2m", "weather_code"] as HourlyParams[],
+  DEFAULT_HOURLY_PARAMS: [
+    HourlyParams.Temperature,
+    HourlyParams.WeatherCode,
+  ] as HourlyParams[],
 
   /** Parámetros meteorológicos diarios solicitados por defecto */
   DEFAULT_DAILY_PARAMS: [
-    "temperature_2m_max",
-    "temperature_2m_min",
+    DailyParams.TemperatureMax,
+    DailyParams.TemperatureMin,
   ] as DailyParams[],
 
   /** Número de días pasados a incluir por defecto */
@@ -117,11 +120,11 @@ export const UNITS = {
   hour: "iso8601",
 
   // Temperatura
-  temperature_2m: "°C",
-  temperature_2m_max: "°C",
-  temperature_2m_min: "°C",
-  dew_point_2m: "°C",
-  apparent_temperature: "°C",
+  temperature_2m: "ºC",
+  temperature_2m_max: "ºC",
+  temperature_2m_min: "ºC",
+  dew_point_2m: "ºC",
+  apparent_temperature: "ºC",
 
   // Humedad y precipitación
   relative_humidity_2m: "%",
