@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { produce } from "immer";
-import { fetchWeather } from "@/services/weatherService";
+import { fetchWeather } from "../services/weatherService";
 import {
   DailyWeatherData,
   FetchWeatherProps,
@@ -10,36 +10,63 @@ import {
   FetchError,
   ErrorType,
   MessageType,
-  ErrorInitialState,
-} from "@/types/weatherTypes";
+} from "../types/weatherTypes";
 
+/**
+ * Estado principal del store meteorológico.
+ */
 interface WeatherState {
+  /** Últimos datos meteorológicos obtenidos y organizados */
   data: StructureWeatherData | null;
+  /** Indica si se está realizando una solicitud */
   loading: boolean;
+  /** Último error producido en la consulta */
   error: FetchError | null;
+  /** Si la actualización automática está activa */
   autoRefresh: boolean;
+  /** Últimos parámetros usados para la consulta */
   fetchParams: FetchWeatherProps | null;
-  // Variables de caché
+  /** Timestamp de la última consulta exitosa */
   lastFetchTime: number | null;
+  /** Duración del caché en milisegundos */
   cacheDuration: number;
 }
 
+/**
+ * Acciones y selectores del store meteorológico.
+ */
 interface WeatherActions {
+  /**
+   * Realiza la solicitud para obtener datos meteorológicos.
+   * @param params Parámetros de la consulta meteorológica
+   */
   fetchWeather: (params: FetchWeatherProps) => Promise<void>;
+  /** Indica si hay una solicitud en curso */
   isLoading: () => boolean;
+  /** Indica si hay un error presente */
   hasError: () => boolean;
+  /** Devuelve el error actual, si existe */
   getError: () => FetchError | null;
+  /** Limpia el error actual */
   clearError: () => void;
+  /** Activa o desactiva la actualización automática */
   setAutoRefresh: (value: boolean) => void;
+  /** Programa la actualización automática para la próxima medianoche local */
   scheduleAutoRefresh: () => void;
+  /** Devuelve todos los datos meteorológicos */
   getAllWeatherData: () => StructureWeatherData | null;
+  /** Devuelve los datos del día actual */
   getCurrentDayWeather: () => DailyWeatherData | null;
+  /** Devuelve los datos de días pasados */
   getPastDayWeather: () => DailyWeatherData[] | null;
+  /** Devuelve los datos de pronóstico */
   getForecastWeather: () => DailyWeatherData[] | null;
+  /** Devuelve los datos meteorológicos de la hora actual */
   getCurrentHourWeather: () => HourlyWeatherData | null;
 }
 
 /**
+ * Compara dos objetos de parámetros de consulta meteorológica.
  * @param a Primer objeto de parámetros de solicitud.
  * @param b Segundo objeto de parámetros de solicitud.
  * @returns Devuelve true si los parámetros de solicitud son iguales.
@@ -63,9 +90,8 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
 
       /**
        * Realiza la solicitud para obtener datos meteorológicos.
-       * Primero revisa si los parámetros son los mismos usados la última vez,
-       * si ya existe data, y si no ha pasado el tiempo suficiente (cacheDuration).
-       * Si todo se cumple, no hace un nuevo fetch.
+       * Si los parámetros y el caché lo permiten, reutiliza los datos existentes.
+       * Si no, realiza una nueva consulta y actualiza el estado.
        */
       fetchWeather: async (params) => {
         const state = get();
@@ -84,13 +110,11 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
         if (canUseCachedData) {
           // No se necesita hacer una nueva solicitud, usar datos en caché
           return;
-        }
-
-        // Establece el estado de carga y limpia cualquier error previo
+        } // Establece el estado de carga y limpia cualquier error previo
         set(
           produce((draft) => {
             draft.loading = true;
-            draft.error = ErrorInitialState;
+            draft.error = null;
             draft.fetchParams = params;
           }),
         );
@@ -136,16 +160,16 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
         }
       },
 
-      // Verifica si está en proceso de carga
+      /** Indica si está en proceso de carga */
       isLoading: () => get().loading,
 
-      // Verifica si se ha producido algún error
+      /** Indica si se ha producido algún error */
       hasError: () => get().error !== null,
 
-      // Obtiene el error actual
+      /** Devuelve el error actual */
       getError: () => get().error,
 
-      // Limpia el error
+      /** Limpia el error actual */
       clearError: () =>
         set(
           produce((draft) => {
@@ -155,7 +179,7 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
 
       /**
        * Activa o desactiva la actualización automática.
-       * Al activarse, programa una llamada a scheduleAutoRefresh().
+       * Si se activa, programa la actualización para la próxima medianoche local.
        */
       setAutoRefresh: (value) => {
         set({ autoRefresh: value });
@@ -186,13 +210,16 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
         }, timeToMidnight);
       },
 
-      // Métodos para obtener datos concretos
+      /** Devuelve todos los datos meteorológicos */
       getAllWeatherData: () => get().data,
       getCurrentDayWeather: () => get().data?.currentDay || null,
       getPastDayWeather: () => get().data?.pastDay || null,
       getForecastWeather: () => get().data?.forecast || null,
 
-      // Devuelve los datos meteorológicos de la hora actual
+      /**
+       * Devuelve los datos meteorológicos de la hora actual.
+       * Busca la hora local actual en el array de horas del día.
+       */
       getCurrentHourWeather() {
         const { data } = get();
         if (!data) return null;
@@ -214,11 +241,12 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
     }),
     {
       name: "weather-store",
+      partialize: (state) => ({
+        data: state.data,
+        fetchParams: state.fetchParams,
+        lastFetchTime: state.lastFetchTime,
+        autoRefresh: state.autoRefresh,
+      }),
     },
   ),
 );
-
-// Programar la actualización automática en la carga de la aplicación
-if (useWeatherStore.getState().autoRefresh) {
-  useWeatherStore.getState().scheduleAutoRefresh();
-}
