@@ -23,15 +23,6 @@ export interface FetchError {
   info?: string;
 }
 
-// Estado inicial de un error
-export const ErrorInitialState: FetchError = {
-  error: "Error desconocido.",
-  info: "",
-  status: 0,
-  type: MessageType.ERROR,
-  errorType: ErrorType.UNKNOWN_ERROR,
-};
-
 // Parámetros meteorológicos disponibles en datos por hora
 export enum HourlyParams {
   Temperature = "temperature_2m", // En grados Celsius ºC
@@ -113,61 +104,67 @@ export interface StructureWeatherData {
   forecast: DailyWeatherData[];
 }
 
-// Representa el tipo base para los datos meteorológicos
-export type Metric<T, U extends string = ""> = {
-  value: T;
-  unit: U;
-};
-export type NumericMetric<U extends string = ""> = Metric<number, U>;
-
-// Datos del viento
-export interface WindDataMetric {
-  speed: NumericMetric<"km/h">;
-  direction?: NumericMetric<"º">;
+// Tipos simplificados para valores meteorológicos
+export interface WeatherValue {
+  value: number;
+  unit: string;
 }
 
-// Datos del índice UV
-export interface UVDataMetric {
+export interface DateValue {
+  value: Date;
+  unit: string;
+}
+
+export interface TextValue {
+  value: string;
+  unit: string;
+}
+
+// Datos del viento simplificados
+export interface WindData {
+  speed: WeatherValue;
+  direction?: WeatherValue;
+}
+
+// Datos del índice UV simplificados
+export interface UVData {
   value: number;
   riskLevel: UvRiskLevels;
   description: string;
-  unit: "text";
+  unit: string;
 }
 
 // Representa la información meteorológica de un día específico
 export interface DailyWeatherData {
-  day?: {
-    value: Date;
-    unit: "iso8601";
-  };
+  day?: DateValue;
   hourly?: HourlyWeatherData[];
-  temperatureMax?: NumericMetric<"ºC">;
-  temperatureMin?: NumericMetric<"ºC">;
-  sunrise?: Metric<Date, "iso8601">;
-  sunset?: Metric<Date, "iso8601">;
-  daylightDuration?: NumericMetric<"h">;
+  temperatureMax?: WeatherValue;
+  temperatureMin?: WeatherValue;
+  sunrise?: DateValue;
+  sunset?: DateValue;
+  daylightDuration?: WeatherValue;
 }
 
 // Representa la información meteorológica por hora
 export interface HourlyWeatherData {
-  hour?: Metric<Date, "iso8601">;
-  temperature?: NumericMetric<"ºC">;
-  relativeHumidity?: NumericMetric<"%">;
-  dewPoint?: NumericMetric<"ºC">;
-  apparentTemperature?: NumericMetric<"ºC">;
-  precipitationProbability?: NumericMetric<"%">;
-  precipitation?: NumericMetric<"mm">;
-  rain?: NumericMetric<"mm">;
-  snowfall?: NumericMetric<"cm">;
-  snowDepth?: NumericMetric<"m">;
-  weatherCode?: NumericMetric<"wmo code">;
-  weatherDescription?: Metric<WeatherDescriptions, "text">;
-  pressureMsl?: NumericMetric<"hPa">;
-  cloudCover?: NumericMetric<"%">;
-  visibility?: NumericMetric<"km">;
-  wind?: WindDataMetric;
-  uv?: UVDataMetric;
-  isDay?: NumericMetric<"">;
+  hour?: DateValue;
+  temperature?: WeatherValue;
+  relativeHumidity?: WeatherValue;
+  dewPoint?: WeatherValue;
+  apparentTemperature?: WeatherValue;
+  precipitationProbability?: WeatherValue;
+  precipitation?: WeatherValue;
+  rain?: WeatherValue;
+  snowfall?: WeatherValue;
+  snowDepth?: WeatherValue;
+  weatherCode?: WeatherValue;
+  weatherDescription?: TextValue;
+  pressureMsl?: WeatherValue;
+  cloudCover?: WeatherValue;
+  visibility?: WeatherValue;
+  wind?: WindData;
+  uv?: UVData;
+  isDay?: WeatherValue;
 }
 
 // Niveles de riesgo del índice UV
@@ -214,10 +211,10 @@ export enum WeatherDescriptions {
   snowfall_moderate = "Nevada moderada",
   snowfall_heavy = "Nevada intensa",
   snow_grains = "Precipitación de granos de nieve",
-  rain_showers_slight = "Chubascos  ligera",
-  rain_showers_moderate = "Chubascos  moderada",
-  rain_showers_violent = "Chubascos  Violentos",
-  snow_showers_slight = "Chubascos de nieve ligera",
-  snow_showers_heavy = "Chubascos de nieve intensa",
+  rain_showers_slight = "Chubascos ligeros",
+  rain_showers_moderate = "Chubascos moderados",
+  rain_showers_violent = "Chubascos violentos",
+  snow_showers_slight = "Chubascos de nieve ligeros",
+  snow_showers_heavy = "Chubascos de nieve intensos",
   thunderstorm = "Tormenta",
 }

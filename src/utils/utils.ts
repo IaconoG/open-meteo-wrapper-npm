@@ -1,5 +1,5 @@
-import { UvRiskLevels } from "@/types/weatherTypes";
-import { uvDescriptions } from "./constants";
+import { UvRiskLevels } from "../types/weatherTypes";
+import { UV_RISK_CONFIG } from "./constants";
 
 /**
  * Obtiene el nivel de riesgo UV basado en el índice UV.
@@ -19,8 +19,8 @@ export const getUvRiskLevel = (index: number): UvRiskLevels => {
  * @returns Descripción del riesgo UV.
  */
 export const getUvDescription = (index: number): string => {
-  if (index < 0) return uvDescriptions.UNKNOWN;
-  if (index <= 2) return uvDescriptions.LOW;
-  if (index <= 7) return uvDescriptions.MODERATE;
-  return uvDescriptions.HIGH;
+  if (index < 0) return UV_RISK_CONFIG.DESCRIPTIONS[UvRiskLevels.UNKNOWN];
+  if (index <= 2) return UV_RISK_CONFIG.DESCRIPTIONS[UvRiskLevels.LOW];
+  if (index <= 7) return UV_RISK_CONFIG.DESCRIPTIONS[UvRiskLevels.MODERATE];
+  return UV_RISK_CONFIG.DESCRIPTIONS[UvRiskLevels.HIGH];
 };
