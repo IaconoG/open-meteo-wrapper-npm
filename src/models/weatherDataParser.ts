@@ -3,17 +3,13 @@ import {
   StructureWeatherData,
   DailyWeatherData,
   HourlyWeatherData,
-  Metric,
-  NumericMetric,
-  WeatherDescriptions,
-  WindDataMetric,
-  UVDataMetric,
-} from "@/types/weatherTypes";
-import { UNITS, WMOWeatherTexts } from "@/utils/constants";
-import { getUvRiskLevel, getUvDescription } from "@/utils/utils";
+} from "../types/weatherTypes";
+import { UNITS, WMO_WEATHER_CODES } from "../utils/constants";
+import { getUvRiskLevel, getUvDescription } from "../utils/utils";
 
 /**
- * Clase para analizar y estructurar los datos meteorológicos obtenidos de la API.
+ * Clase encargada de analizar y estructurar los datos meteorológicos obtenidos de la API.
+ * Convierte los datos crudos en estructuras tipadas y listas para usar en la aplicación.
  */
 export class WeatherDataParser {
   private weatherData: WeatherData;
@@ -21,10 +17,10 @@ export class WeatherDataParser {
   private forecastDays: number;
 
   /**
-   * Constructor de la clase WeatherDataParser.
-   * @param weatherData - Datos meteorológicos obtenidos de la API.
-   * @param pastDays - Número de días pasados a incluir en los datos.
-   * @param forecastDays - Número de días de pronóstico a incluir en los datos.
+   * Crea una instancia del parser de datos meteorológicos.
+   * @param weatherData Datos meteorológicos crudos de la API
+   * @param pastDays Número de días pasados incluidos
+   * @param forecastDays Número de días de pronóstico incluidos
    */
   constructor(
     weatherData: WeatherData,
@@ -37,20 +33,24 @@ export class WeatherDataParser {
   }
 
   /**
-   * Analiza y estructura los datos meteorológicos.
-   * @returns Estructura de los datos meteorológicos organizados.
+   * Analiza y estructura los datos meteorológicos en formato tipado y organizado.
+   * @returns {StructureWeatherData} Datos meteorológicos organizados por día y hora
    */
   public parse(): StructureWeatherData {
     const currentDayIndex = this.pastDays;
     const forecastDayStartIndex = currentDayIndex + 1;
-    const totalDays = this.pastDays + this.forecastDays;
+    const totalDays = this.pastDays + this.forecastDays + 1;
+
+    const processedData = this.processWeatherData(
+      currentDayIndex,
+      forecastDayStartIndex,
+    );
+    const currentDay =
+      processedData.length > 0 ? processedData[0] : ({} as DailyWeatherData);
 
     return {
       pastDay: this.processWeatherData(0, currentDayIndex),
-      currentDay: this.processWeatherData(
-        currentDayIndex,
-        forecastDayStartIndex,
-      )[0],
+      currentDay: currentDay,
       forecast: this.processWeatherData(forecastDayStartIndex, totalDays),
       timezone: this.weatherData.timezone,
       latitude: this.weatherData.latitude,
@@ -59,10 +59,10 @@ export class WeatherDataParser {
   }
 
   /**
-   * Procesa los datos meteorológicos diarios.
-   * @param startIndex - Índice de inicio para los datos diarios.
-   * @param endIndex - Índice de fin para los datos diarios.
-   * @returns Array de datos meteorológicos diarios.
+   * Procesa los datos meteorológicos diarios y los convierte a tipos simplificados.
+   * @param startIndex Índice de inicio en el array de días
+   * @param endIndex Índice de fin (no inclusivo) en el array de días
+   * @returns {DailyWeatherData[]} Array de datos diarios estructurados
    */
   private processWeatherData(
     startIndex: number,
@@ -81,54 +81,61 @@ export class WeatherDataParser {
     } = daily;
 
     for (let i = startIndex; i < endIndex; i++) {
-      const dailyValues: Partial<DailyWeatherData> = {};
+      const dailyData: DailyWeatherData = {};
 
-      const dataMap: Record<
-        string,
-        | Metric<Date | number, string>
-        | NumericMetric<string>
-        | WeatherDescriptions
-        | HourlyWeatherData[]
-        | { value: undefined; unit: string }
-      > = {
-        day: { value: time?.[i], unit: UNITS.time },
-        hourly: this.getHourlyData(i),
-        temperatureMax: {
-          value: temperature_2m_max?.[i],
+      // Asignar valores diarios con tipos simplificados
+      if (time?.[i]) {
+        dailyData.day = { value: new Date(time[i]), unit: UNITS.time };
+      }
+
+      if (temperature_2m_max?.[i] !== undefined) {
+        dailyData.temperatureMax = {
+          value: temperature_2m_max[i],
           unit: UNITS.temperature_2m_max,
-        },
-        temperatureMin: {
-          value: temperature_2m_min?.[i],
-          unit: UNITS.temperature_2m_min,
-        },
-        sunrise: { value: sunrise?.[i], unit: UNITS.sunrise },
-        sunset: { value: sunset?.[i], unit: UNITS.sunset },
-        daylightDuration: {
-          value: daylight_duration?.[i]
-            ? daylight_duration[i] / 3600
-            : undefined,
-          unit: UNITS.daylight_duration,
-        },
-      };
+        };
+      }
 
-      this.assignValues(dailyValues, dataMap);
-      if (Object.keys(dailyValues).length > 0) structuredDays.push(dailyValues);
-      break;
+      if (temperature_2m_min?.[i] !== undefined) {
+        dailyData.temperatureMin = {
+          value: temperature_2m_min[i],
+          unit: UNITS.temperature_2m_min,
+        };
+      }
+
+      if (sunrise?.[i]) {
+        dailyData.sunrise = {
+          value: new Date(sunrise[i]),
+          unit: UNITS.sunrise,
+        };
+      }
+
+      if (sunset?.[i]) {
+        dailyData.sunset = { value: new Date(sunset[i]), unit: UNITS.sunset };
+      }
+
+      if (daylight_duration?.[i] !== undefined) {
+        dailyData.daylightDuration = {
+          value: daylight_duration[i] / 3600, // Convertir a horas
+          unit: UNITS.daylight_duration,
+        };
+      }
+
+      // Agregar datos horarios estructurados
+      dailyData.hourly = this.getHourlyData(i);
+
+      structuredDays.push(dailyData);
     }
+
     return structuredDays;
   }
 
   /**
-   * Obtiene los datos meteorológicos por hora para un día específico.
-   * @param dayIndex - Índice del día para obtener los datos por hora.
-   * @returns Array de datos meteorológicos por hora.
+   * Obtiene los datos meteorológicos por hora y los convierte a tipos simplificados.
+   * @param dayIndex Índice del día para extraer las 24 horas correspondientes
+   * @returns {HourlyWeatherData[]} Array de datos horarios estructurados
    */
   private getHourlyData(dayIndex: number): HourlyWeatherData[] {
-    const HOURS_PER_DAY = 24;
-    const start = dayIndex * HOURS_PER_DAY;
-    const end = start + HOURS_PER_DAY;
-    const { hourly } = this.weatherData;
-
+    const { hourly, daily } = this.weatherData;
     const {
       time,
       temperature_2m,
@@ -150,141 +157,164 @@ export class WeatherDataParser {
       is_day,
     } = hourly;
 
+    // Obtener la fecha del día
+    const dayDate = new Date(daily.time[dayIndex]);
+    const dayYear = dayDate.getUTCFullYear();
+    const dayMonth = dayDate.getUTCMonth();
+    const dayDay = dayDate.getUTCDate();
+
     const hourlyData: HourlyWeatherData[] = [];
 
-    for (let i = start; i < end; i++) {
-      const hourlyValues: HourlyWeatherData = {};
-
-      const dataMap: Record<
-        string,
-        | Metric<Date | number | WeatherDescriptions, string>
-        | WeatherDescriptions
-        | WindDataMetric
-        | UVDataMetric
-        | { value: undefined; unit: string }
-      > = {
-        hour: { value: time?.[i], unit: UNITS.time } as Metric<Date, "iso8601">,
-        temperature: {
-          value: temperature_2m?.[i],
-          unit: UNITS.temperature_2m,
-        } as NumericMetric<"ºC">,
-        weatherCode: {
-          value: weather_code?.[i],
-          unit: UNITS.weather_code,
-        } as NumericMetric<"wmo code">,
-        weatherDescription: {
-          value: WMOWeatherTexts[weather_code?.[i]],
-          unit: "text",
-        } as Metric<WeatherDescriptions, "text">,
-        relativeHumidity: {
-          value: relative_humidity_2m?.[i],
-          unit: UNITS.relative_humidity_2m,
-        } as NumericMetric<"%">,
-        dewPoint: {
-          value: dew_point_2m?.[i],
-          unit: UNITS.dew_point_2m,
-        } as NumericMetric<"ºC">,
-        apparentTemperature: {
-          value: apparent_temperature?.[i],
-          unit: UNITS.apparent_temperature,
-        } as NumericMetric<"ºC">,
-        precipitationProbability: {
-          value: precipitation_probability?.[i],
-          unit: UNITS.precipitation_probability,
-        } as NumericMetric<"%">,
-        precipitation: {
-          value: precipitation?.[i],
-          unit: UNITS.precipitation,
-        } as NumericMetric<"mm">,
-        rain: { value: rain?.[i], unit: UNITS.rain } as NumericMetric<"mm">,
-        snowfall: {
-          value: snowfall?.[i],
-          unit: UNITS.snowfall,
-        } as NumericMetric<"cm">,
-        snowDepth: {
-          value: snow_depth?.[i],
-          unit: UNITS.snow_depth,
-        } as NumericMetric<"m">,
-        pressureMsl: {
-          value: pressure_msl?.[i],
-          unit: UNITS.pressure_msl,
-        } as NumericMetric<"hPa">,
-        cloudCover: {
-          value: cloud_cover?.[i],
-          unit: UNITS.cloud_cover,
-        } as NumericMetric<"%">,
-        visibility: {
-          value: visibility?.[i] ? visibility[i] / 1000 : undefined,
-          unit: UNITS.visibility,
-        } as NumericMetric<"km">,
-        uv: {
-          value: uv_index?.[i],
-          unit: "text",
-          riskLevel: getUvRiskLevel(uv_index?.[i] ?? 0),
-          description: getUvDescription(uv_index?.[i] ?? 0),
-        } as UVDataMetric,
-        wind: {
-          direction: {
-            value: wind_direction_10m?.[i],
-            unit: UNITS.wind_direction_10m,
-          } as NumericMetric<"º">,
-          speed: {
-            value: wind_speed_10m?.[i],
-            unit: UNITS.wind_speed_10m,
-          } as NumericMetric<"km/h">,
-        } as WindDataMetric,
-        isDay: { value: is_day?.[i], unit: UNITS.is_day } as NumericMetric<"">,
-      };
-      this.assignValues(hourlyValues, dataMap);
-
-      if (Object.keys(hourlyValues).length > 0) hourlyData.push(hourlyValues);
-    }
-    return hourlyData;
-  }
-
-  /**
-   * Asigna valores del dataMap al objeto target.
-   * @param target - Objeto destino donde se asignarán los valores.
-   * @param dataMap - Mapa de datos con las claves y valores a asignar.
-   */
-  private assignValues(
-    target: Partial<DailyWeatherData> | HourlyWeatherData,
-    dataMap: Record<
-      string,
-      | Metric<Date | number | WeatherDescriptions, string>
-      | NumericMetric<string>
-      | WeatherDescriptions
-      | HourlyWeatherData[]
-      | WindDataMetric
-      | UVDataMetric
-      | { value: undefined; unit: string }
-    >,
-  ) {
-    Object.keys(dataMap).forEach((key) => {
-      const value = dataMap[key];
-
-      if (key in target) {
-        if (isDailyWeatherData(target)) {
-          (target as DailyWeatherData)[key as keyof DailyWeatherData] =
-            value as any;
-        } else if (isHourlyWeatherData(target)) {
-          (target as HourlyWeatherData)[key as keyof HourlyWeatherData] =
-            value as any;
+    // Para cada hora del día (0 a 23)
+    for (let hour = 0; hour < 24; hour++) {
+      // Buscar el índice en hourly.time que coincida con este día y hora
+      let foundIndex = -1;
+      for (let i = 0; i < time.length; i++) {
+        const hourDate = new Date(time[i]);
+        if (
+          hourDate.getUTCFullYear() === dayYear &&
+          hourDate.getUTCMonth() === dayMonth &&
+          hourDate.getUTCDate() === dayDay &&
+          hourDate.getUTCHours() === hour
+        ) {
+          foundIndex = i;
+          break;
         }
       }
-    });
+
+      if (foundIndex !== -1) {
+        // Hay datos para esta hora
+        const i = foundIndex;
+        const hourData: HourlyWeatherData = {};
+        hourData.hour = { value: new Date(time[i]), unit: UNITS.hour };
+
+        if (temperature_2m?.[i] !== undefined) {
+          hourData.temperature = {
+            value: temperature_2m[i],
+            unit: UNITS.temperature_2m,
+          };
+        }
+        if (relative_humidity_2m?.[i] !== undefined) {
+          hourData.relativeHumidity = {
+            value: relative_humidity_2m[i],
+            unit: UNITS.relative_humidity_2m,
+          };
+        }
+        if (dew_point_2m?.[i] !== undefined) {
+          hourData.dewPoint = {
+            value: dew_point_2m[i],
+            unit: UNITS.dew_point_2m,
+          };
+        }
+        if (apparent_temperature?.[i] !== undefined) {
+          hourData.apparentTemperature = {
+            value: apparent_temperature[i],
+            unit: UNITS.apparent_temperature,
+          };
+        }
+        if (precipitation_probability?.[i] !== undefined) {
+          hourData.precipitationProbability = {
+            value: precipitation_probability[i],
+            unit: UNITS.precipitation_probability,
+          };
+        }
+        if (precipitation?.[i] !== undefined) {
+          hourData.precipitation = {
+            value: precipitation[i],
+            unit: UNITS.precipitation,
+          };
+        }
+        if (rain?.[i] !== undefined) {
+          hourData.rain = {
+            value: rain[i],
+            unit: UNITS.rain,
+          };
+        }
+        if (snowfall?.[i] !== undefined) {
+          hourData.snowfall = {
+            value: snowfall[i],
+            unit: UNITS.snowfall,
+          };
+        }
+        if (snow_depth?.[i] !== undefined) {
+          hourData.snowDepth = {
+            value: snow_depth[i],
+            unit: UNITS.snow_depth,
+          };
+        }
+        if (weather_code?.[i] !== undefined) {
+          hourData.weatherCode = {
+            value: weather_code[i],
+            unit: UNITS.weather_code,
+          };
+          const description = WMO_WEATHER_CODES[weather_code[i]];
+          if (description) {
+            hourData.weatherDescription = {
+              value: description,
+              unit: "text",
+            };
+          }
+        }
+        if (pressure_msl?.[i] !== undefined) {
+          hourData.pressureMsl = {
+            value: pressure_msl[i],
+            unit: UNITS.pressure_msl,
+          };
+        }
+        if (cloud_cover?.[i] !== undefined) {
+          hourData.cloudCover = {
+            value: cloud_cover[i],
+            unit: UNITS.cloud_cover,
+          };
+        }
+        if (visibility?.[i] !== undefined) {
+          hourData.visibility = {
+            value: visibility[i] / 1000,
+            unit: UNITS.visibility,
+          };
+        }
+        if (
+          wind_speed_10m?.[i] !== undefined ||
+          wind_direction_10m?.[i] !== undefined
+        ) {
+          hourData.wind = {
+            speed: {
+              value: wind_speed_10m?.[i] || 0,
+              unit: UNITS.wind_speed_10m,
+            },
+          };
+          if (wind_direction_10m?.[i] !== undefined) {
+            hourData.wind.direction = {
+              value: wind_direction_10m[i],
+              unit: UNITS.wind_direction_10m,
+            };
+          }
+        }
+        if (uv_index?.[i] !== undefined) {
+          const uvValue = uv_index[i];
+          hourData.uv = {
+            value: uvValue,
+            riskLevel: getUvRiskLevel(uvValue),
+            description: getUvDescription(uvValue),
+            unit: "index",
+          };
+        }
+        if (is_day?.[i] !== undefined) {
+          hourData.isDay = {
+            value: is_day[i],
+            unit: UNITS.is_day,
+          };
+        }
+        hourlyData.push(hourData);
+      } else {
+        // No hay datos para esta hora, solo agregar el objeto hour
+        const missingHour = new Date(
+          Date.UTC(dayYear, dayMonth, dayDay, hour, 0, 0, 0),
+        );
+        hourlyData.push({ hour: { value: missingHour, unit: UNITS.hour } });
+      }
+    }
+
+    return hourlyData;
   }
-}
-
-// Funciones de refinamiento de tipos
-function isDailyWeatherData(
-  target: Partial<DailyWeatherData> | HourlyWeatherData,
-): target is DailyWeatherData {
-  return "temperatureMax" in target; // Propiedad específica de DailyWeatherData
-}
-
-function isHourlyWeatherData(
-  target: Partial<DailyWeatherData> | HourlyWeatherData,
-): target is HourlyWeatherData {
-  return "temperature" in target; // Propiedad específica de HourlyWeatherData
 }
