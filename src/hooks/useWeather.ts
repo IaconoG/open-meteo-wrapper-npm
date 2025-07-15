@@ -4,9 +4,9 @@ import { FetchWeatherProps } from "../types/weatherTypes";
 
 /**
  * Hook personalizado para el manejo de los datos meteorológicos.
- * Proporciona una interfaz React simplificada y adaptada a la nueva estructura del parser.
+ * Proporciona una interfaz React con memoización y acciones del store.
  *
- * @returns {object} Datos meteorológicos principales, estado y acciones útiles
+ * @returns {object} Datos meteorológicos, estado y acciones.
  */
 export const useWeather = () => {
   const store = useWeatherStore();
@@ -19,7 +19,7 @@ export const useWeather = () => {
     async (params: FetchWeatherProps) => {
       await store.fetchWeather(params);
     },
-    [store.fetchWeather]
+    [store.fetchWeather],
   );
 
   /**
@@ -48,7 +48,7 @@ export const useWeather = () => {
       isLoading: store.loading,
       error: store.error,
     }),
-    [store.data, store.loading, store.error]
+    [store.data, store.loading, store.error],
   );
 
   return {
