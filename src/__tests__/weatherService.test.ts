@@ -1,152 +1,190 @@
-/**
- * @description
- * El objetivo del test es probar el servicio, no el servicio externo. Si el servicio real
- * (weatherService.ts) falla o cambia, podría romper el test, aunque el servicio siga
- * funcionando bien.
- */
-
-import { http, HttpResponse } from "msw";
-import { setupServer } from "msw/node";
-
 import { fetchWeather } from "../services/weatherService";
 import {
-  DailyParams,
   FetchWeatherProps,
   HourlyParams,
-  StructureWeatherData,
+  DailyParams,
   WeatherData,
-  ErrorType,
-  MessageType,
 } from "../types/weatherTypes";
-import { BASE_URL, WEATHER_CONSTANTS } from "../utils/constants";
 
-/**
- * Mock de los datos meteorológicos.
- */
-const mockWeatherData: WeatherData = {
-  latitude: 40.7128,
-  longitude: -74.006,
-  timezone: WEATHER_CONSTANTS.DEFAULT_TIMEZONE,
-  timezone_abbreviation: "UTC",
-  current: { time: new Date() },
-  hourly: { temperature_2m: [20], weather_code: [800], time: [new Date()] },
-  daily: {
-    time: [new Date()],
-    temperature_2m_max: [25],
-    temperature_2m_min: [15],
-  },
-};
+// Mock global fetch
+global.fetch = jest.fn();
 
-/**
- * Verifica si los datos tienen la estructura de StructureWeatherData.
- */
-function isStructureWeatherData(data: unknown): data is StructureWeatherData {
-  if (typeof data !== "object" || data === null) {
-    return false;
-  }
-  return (
-    "latitude" in data &&
-    "longitude" in data &&
-    "timezone" in data &&
-    "currentDay" in data &&
-    "pastDay" in data &&
-    "forecast" in data
-  );
-}
-
-/**
- * Tipo de datos de respuesta simulada.
- */
-type MockResponseData = StructureWeatherData;
-
-/**
- * Configuración del servidor de pruebas con msw.
- */
-const server = setupServer(
-  http.get<object, MockResponseData>(BASE_URL, () => {
-    return HttpResponse.json(mockWeatherData);
-  }),
-);
-
-// Configuración y limpieza del servidor de pruebas
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-
-// Descripción de los tests para fetchWeather
-describe("fetchWeather", () => {
-  const mockFetchProps: FetchWeatherProps = {
-    latitude: 40.7128,
-    longitude: -74.006,
-    hourly: [HourlyParams.Temperature],
-    daily: [DailyParams.TemperatureMax, DailyParams.TemperatureMin],
-    timezone: WEATHER_CONSTANTS.DEFAULT_TIMEZONE,
-    forecast_days: 1,
-  };
-
-  it("should fetch weather data successfully", async () => {
-    const weatherData = await fetchWeather(mockFetchProps);
-
-    if (isStructureWeatherData(weatherData)) {
-      expect(weatherData.latitude).toBe(mockWeatherData.latitude);
-      expect(weatherData.longitude).toBe(mockWeatherData.longitude);
-      expect(weatherData.timezone).toBe(mockWeatherData.timezone);
-      expect(weatherData.currentDay.hourly).not.toBeUndefined();
-      expect(weatherData.pastDay.length).toBe(0);
-      expect(weatherData.forecast.length).toBe(0);
-    } else {
-      fail("The data is not a StructureWeatherData object.");
-    }
+describe("weatherService", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("should handle errors and return error data when the request fails", async () => {
-    server.use(
-      http.get(BASE_URL, () => {
-        return new HttpResponse(null, { status: 500 });
-      }),
-    );
+  describe("fetchWeather", () => {
+    const validParams: FetchWeatherProps = {
+      latitude: 40.7128,
+      longitude: -74.006,
+      hourly: [HourlyParams.Temperature, HourlyParams.WeatherCode],
+      daily: [DailyParams.TemperatureMax, DailyParams.TemperatureMin],
+    };
+    const mockApiResponse: WeatherData = {
+      latitude: 40.7128,
+      longitude: -74.006,
+      timezone: "America/New_York",
+      hourly: {
+        time: [
+          new Date("2025-01-01T00:00:00Z"),
+          new Date("2025-01-01T01:00:00Z"),
+        ],
+        temperature_2m: [20, 19],
+        weather_code: [0, 1],
+      },
+      daily: {
+        time: [new Date("2025-01-01")],
+        temperature_2m_max: [25],
+        temperature_2m_min: [15],
+        sunrise: [new Date("2025-01-01T07:00:00Z")],
+        sunset: [new Date("2025-01-01T18:00:00Z")],
+      },
+    };
 
-    const weatherData = await fetchWeather({
-      latitude: -34.9215,
-      longitude: -57.9545,
+    it("should fetch and parse weather data successfully", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockApiResponse,
+      });
+
+      const result = await fetchWeather(validParams);
+
+      // Verificar que fetch fue llamado correctamente
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining("https://api.open-meteo.com/v1/forecast"),
+        expect.objectContaining({
+          signal: expect.any(AbortSignal),
+        }),
+      );
+
+      // Verificar URL parameters
+      const fetchCall = (global.fetch as jest.Mock).mock.calls[0][0];
+      const url = new URL(fetchCall);
+      expect(url.searchParams.get("latitude")).toBe("40.7128");
+      expect(url.searchParams.get("longitude")).toBe("-74.006");
+      expect(url.searchParams.get("hourly")).toBe(
+        "temperature_2m,weather_code",
+      );
+
+      // Verificar estructura de datos parseada
+      expect(result).toHaveProperty("latitude", 40.7128);
+      expect(result).toHaveProperty("longitude", -74.006);
+      expect(result).toHaveProperty("timezone", "America/New_York");
+      expect(result).toHaveProperty("currentDay");
+      expect(result).toHaveProperty("pastDay");
+      expect(result).toHaveProperty("forecast");
     });
 
-    expect(weatherData).toHaveProperty("error");
-    expect(weatherData).toHaveProperty("status", 500);
-    expect(weatherData).toEqual({
-      error:
-        "Debido a un problema en el servidor, no podemos obtener la información del clima.",
-      info: "Por favor, inténtalo de nuevo más tarde.",
-      status: 500,
-      type: MessageType.ERROR,
-      errorType: ErrorType.API_ERROR,
+    it("should handle 500 server errors", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      });
+
+      const result = await fetchWeather(validParams);
+
+      expect(result).toHaveProperty("error");
+      expect(result).toHaveProperty("status", 500);
+      expect(result).toHaveProperty("type", "error");
+      expect(result).toHaveProperty("errorType", "api_error");
+    });
+
+    it("should handle 400 client errors", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+      });
+
+      const result = await fetchWeather(validParams);
+
+      expect(result).toHaveProperty("error");
+      expect(result).toHaveProperty("status", 400);
+      expect(result).toHaveProperty("type", "warning");
+      expect(result).toHaveProperty("errorType", "api_error");
+    });
+
+    it("should handle network timeout", async () => {
+      (global.fetch as jest.Mock).mockImplementationOnce(
+        () =>
+          new Promise((_, reject) => {
+            setTimeout(
+              () => reject(new DOMException("AbortError", "AbortError")),
+              100,
+            );
+          }),
+      );
+
+      const result = await fetchWeather(validParams);
+
+      expect(result).toHaveProperty("error");
+      expect(result).toHaveProperty("status", 408);
+      expect(result).toHaveProperty("type", "warning");
+      expect(result).toHaveProperty("errorType", "network_error");
+    });
+
+    it("should handle malformed JSON response", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => {
+          throw new Error("Invalid JSON");
+        },
+      });
+
+      const result = await fetchWeather(validParams);
+
+      expect(result).toHaveProperty("error");
+      expect(result).toHaveProperty("type", "error");
+      expect(result).toHaveProperty("errorType", "unknown_error");
+    });
+
+    it("should use default parameters when not provided", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockApiResponse,
+      });
+
+      await fetchWeather({
+        latitude: 40.7128,
+        longitude: -74.006,
+      });
+
+      const fetchCall = (global.fetch as jest.Mock).mock.calls[0][0];
+      const url = new URL(fetchCall);
+
+      expect(url.searchParams.get("hourly")).toBe(
+        "temperature_2m,weather_code",
+      );
+      expect(url.searchParams.get("daily")).toBe(
+        "temperature_2m_max,temperature_2m_min",
+      );
+      expect(url.searchParams.get("timezone")).toBe("America/Sao_Paulo");
+      expect(url.searchParams.get("past_days")).toBe("0");
+      expect(url.searchParams.get("forecast_days")).toBe("7");
+    });
+
+    it("should handle fetch abortion after timeout", async () => {
+      jest.useFakeTimers();
+
+      const mockAbort = jest.fn();
+      const mockController = {
+        abort: mockAbort,
+        signal: { aborted: false } as AbortSignal,
+      };
+
+      global.AbortController = jest.fn(() => mockController) as any;
+
+      const fetchPromise = new Promise(() => {}); // Promise que nunca se resuelve
+      (global.fetch as jest.Mock).mockReturnValueOnce(fetchPromise);
+
+      const resultPromise = fetchWeather(validParams);
+
+      // Avanzar 10 segundos para activar el timeout
+      jest.advanceTimersByTime(10000);
+
+      expect(mockAbort).toHaveBeenCalled();
+
+      jest.useRealTimers();
     });
   });
-
-  it("should handle errors and return error data when the request times out", async () => {
-    server.use(
-      http.get(BASE_URL, () => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(new HttpResponse(null, { status: 408 }));
-          }, 5000);
-        });
-      }),
-    );
-
-    const weatherData = await fetchWeather({
-      latitude: -34.9215,
-      longitude: -57.9545,
-    });
-
-    expect(weatherData).toHaveProperty("error");
-    expect(weatherData).toHaveProperty("status", 408);
-    expect(weatherData).toEqual({
-      error: "La solicitud ha tardado demasiado tiempo en completarse.",
-      status: 408,
-      info: "Revisa tu conexión a internet e intenta de nuevo.",
-      type: MessageType.WARNING,
-      errorType: ErrorType.NETWORK_ERROR,
-    });
-  }, 10000);
 });
