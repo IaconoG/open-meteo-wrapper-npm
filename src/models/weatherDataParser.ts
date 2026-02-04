@@ -1,9 +1,12 @@
-import {
-  WeatherData,
-  StructureWeatherData,
-  DailyWeatherData,
-  HourlyWeatherData,
-} from "../types/weatherTypes";
+// Deprecated: Este archivo ha sido marcado para mover a `deprecated/models`.
+// Se mantiene en el repositorio por compatibilidad/histórico. No usar en nuevo código.
+
+// Usa en su lugar `src/adapters/OpenMeteoAdapter.ts` que implementa el Adapter Pattern
+// y proporciona la misma funcionalidad de transformación de la respuesta de Open-Meteo.
+// No eliminar hasta validar la migración completa.
+
+import { WeatherData } from "../types/apiTypes";
+import { StructureWeatherData, DailyWeatherData, HourlyWeatherData } from "../types/weatherTypes";
 import { UNITS, WMO_WEATHER_CODES } from "../utils/constants";
 import { getUvRiskLevel, getUvDescription } from "../utils/utils";
 
