@@ -49,9 +49,9 @@ export const uvDescriptions = {
 } as const;
 ```
 
-## WMOWeatherTexts
+## WMO_WEATHER_CODES
 
-`WMOWeatherTexts`: Objeto que mapea los códigos de tiempo WMO a sus descripciones correspondientes en español. Estos códigos son utilizados para interpretar las condiciones meteorológicas de manera estandarizada.
+`WMO_WEATHER_CODES`:
 
 | Código | Descripción                                  | Traducción                 |
 | ------ | -------------------------------------------- | -------------------------- |

@@ -1,104 +1,148 @@
-# Open Meteo Wrapper
+# @giann/open-meteo-wrapper
 
-Tabla de Contenidos
+Un wrapper completo para la API de Open-Meteo que proporciona hooks de React y servicios reutilizables para obtener datos meteorológicos.
 
-- [Open Meteo Wrapper](#open-meteo-wrapper)
-  - [Descripción](#descripción)
-  - [Instalación](#instalación)
-  - [Tecnologías Utilizadas](#tecnologías-utilizadas)
-  - [Documentación](#documentación)
-  - [Ejemplo de Uso](#ejemplo-de-uso)
-    - [Uso del hook `useWeather`](#uso-del-hook-useweather)
-    - [Uso del servicio `fetchWeather`](#uso-del-servicio-fetchweather)
-  - [Contribución](#contribución)
-  - [Licencia](#licencia)
+## 🌟 Características
 
-## Descripción
+- ✅ **Hook de React optimizado** con caché automático
+- ✅ **Servicio puro** sin dependencias de React
+- ✅ **TypeScript completo** con tipos seguros
+- ✅ **Caché inteligente** para optimizar las llamadas a la API
+- ✅ **Manejo de errores robusto**
+- ✅ **Auto-refresh programable**
+- ✅ **Zero configuración** - funciona out-of-the-box
 
-Este paquete de npm permite obtener datos meteorológicos de la API [Open-Meteo](https://open-meteo.com) de forma sencilla. El paquete exporta un hook `useWeather` que utiliza un almacenamiento global con Zustand y un servicio `fetchWeather` que nos permite obtener datos meteorológicos de la API Open-Meteo. El usuario puede optar por utilizar tanto el hook como o el servicio.
-
-## Instalación
+## 📦 Instalación
 
 ```bash
 npm install @giann/open-meteo-wrapper
 ```
 
-## Tecnologías Utilizadas
+## 🚀 Uso Rápido
 
-El paquete está desarrollado con las siguientes tecnologías:
-
-- [Open-Meteo](https://open-meteo.com) - Utilizada para obtener datos meteorológicos
-- [TypeScript](https://www.typescriptlang.org/) - Utilizado para el desarrollo del paquete
-- [Zustand](https://zustand.surge.sh/) - Utilizado para el almacenamiento global
-- [Vite](https://vitejs.dev/) - Utilizado para el desarrollo del paquete
-- [Jest](https://jestjs.io/) - Utilizado para las pruebas unitarias
-
-## Documentación
-
-Para obtener más detalles sobre el uso del paquete, consulta la documentación:
-
-- [Guía de Uso](./docs/usage.md): Cómo utilizar `useWeather` y `fetchWeather`.
-- Referencia de la API: Explicación detallada de los hooks, funciones y servicios disponibles.
-
-  - [useWeather](./docs/api-reference/useWeather.md)
-  - [useWeatherStore](./docs/api-reference/useWeatherStore.md)
-  - [fetchWeatherService](./docs/api-reference/fetchWeatherService.md)
-
-- [Tipos Exportados](./docs/types.md): Definición de los tipos de datos utilizados en el paquete.
-- [Constantes](./docs/constants.md): Constantes utilizadas en el paquete.
-
-## Ejemplo de Uso
-
-A continuación, ejemplos básicos de cómo usar el hook `useWeather` y el servicio `fetchWeather`:
-
-### Uso del hook `useWeather`
+### Con React Hook
 
 ```typescript
 import { useWeather } from "@giann/open-meteo-wrapper";
 
 function WeatherComponent() {
-  const { weatherData, fetchWeather } = useWeather();
+  const { data, isLoading, error, fetchWeather } = useWeather();
+
+  useEffect(() => {
+    fetchWeather({
+      latitude: 40.7128,
+      longitude: -74.006,
+      hourly: ["temperature_2m", "weather_code"],
+      daily: ["temperature_2m_max", "temperature_2m_min"],
+    });
+  }, []);
+
+  if (isLoading) return <div>Cargando...</div>;
+  if (error) return <div>Error: {error.error}</div>;
 
   return (
     <div>
-      <button
-        onClick={() => fetchWeather({ latitude: 40.7128, longitude: -74.006 })}
-      >
-        Obtener Clima
-      </button>
-      {weatherData && (
-        <div>
-          <p>Temperatura: {weatherData.temperature}°C</p>
-          <p>Condición: {weatherData.condition}</p>
-        </div>
-      )}
+      <h1>Clima Actual</h1>
+      <p>Temperatura: {data?.currentDay?.temperatureMax?.value}°C</p>
     </div>
   );
 }
 ```
 
-### Uso del servicio `fetchWeather`
+### Con Servicio Puro
 
 ```typescript
 import { fetchWeather } from "@giann/open-meteo-wrapper";
 
-async function getWeather() {
-  const weatherData = await fetchWeather({
+async function getWeatherData() {
+  const result = await fetchWeather({
     latitude: 40.7128,
     longitude: -74.006,
+    hourly: ["temperature_2m", "relative_humidity_2m"],
+    daily: ["temperature_2m_max", "temperature_2m_min"],
   });
-  console.log(weatherData);
-}
 
-getWeather();
+  if ("error" in result) {
+    console.error("Error:", result.error);
+    return;
+  }
+
+  console.log("Datos meteorológicos:", result);
+}
 ```
 
-Para más ejemplos y casos de uso avanzados, consulta la [Guía de Uso](./docs/usage.md).
+## 📋 API Reference
 
-## Contribución
+### useWeather Hook
 
-Si deseas contribuir al proyecto, por favor abre un issue o un pull request en el repositorio de GitHub [Open Meteo Wrapper NPM](https://github.com/IaconoG/open-meteo-wrapper-npm)
+```typescript
+const {
+  data, // Datos meteorológicos estructurados
+  currentDay, // Datos del día actual
+  pastDays, // Datos de días pasados
+  forecast, // Pronóstico futuro
+  currentHour, // Datos de la hora actual
+  isLoading, // Estado de carga
+  error, // Error si existe
+  fetchWeather, // Función para obtener datos
+  setAutoRefresh, // Configurar auto-refresh
+  clearError, // Limpiar errores
+} = useWeather();
+```
 
-## Licencia
+### fetchWeather Service
+
+```typescript
+const result = await fetchWeather({
+  latitude: number,        // Latitud (requerido)
+  longitude: number,       // Longitud (requerido)
+  hourly?: HourlyParams[], // Parámetros por hora
+  daily?: DailyParams[],   // Parámetros diarios
+  timezone?: string,       // Zona horaria
+  past_days?: number,      // Días pasados
+  forecast_days?: number   // Días de pronóstico
+});
+```
+
+## 🎯 Parámetros Disponibles
+
+### Parámetros Horarios (HourlyParams)
+
+- `temperature_2m` - Temperatura a 2m
+- `relative_humidity_2m` - Humedad relativa
+- `weather_code` - Código meteorológico WMO
+- `wind_speed_10m` - Velocidad del viento
+- `precipitation` - Precipitación
+- Y muchos más...
+
+### Parámetros Diarios (DailyParams)
+
+- `temperature_2m_max` - Temperatura máxima
+- `temperature_2m_min` - Temperatura mínima
+- `sunrise` - Hora de salida del sol
+- `sunset` - Hora de puesta del sol
+
+## 🔧 Configuración Avanzada
+
+### Auto-refresh
+
+```typescript
+const { setAutoRefresh } = useWeather();
+setAutoRefresh(true); // Actualización automática a medianoche
+```
+
+### Caché personalizado
+
+El hook incluye caché inteligente de 10 minutos por defecto.
+
+## 🌍 Ejemplos Completos
+
+Visita la carpeta `docs/` para ejemplos completos y casos de uso avanzados.
+
+## 📄 Licencia
 
 MIT
+
+## 🤝 Contribuciones
+
+¡Las contribuciones son bienvenidas! Por favor, abre un issue o pull request.

@@ -5,32 +5,35 @@
     "type": "git",
     "url": "https://github.com/IaconoG/open-meteo-wrapper-npm.git"
   },
-  "description": "A weather app using open-meteo API",
+  "description": "Un wrapper completo para la API de Open-Meteo con hooks de React y servicios reutilizables",
   "keywords": [
     "weather",
     "open-meteo",
     "react",
     "zustand",
-    "vite"
+    "vite",
+    "typescript",
+    "weather-api",
+    "meteorology",
+    "forecast",
+    "climate"
   ],
+  "author": "Giann Iacono <email@example.com>",
+  "homepage": "https://github.com/IaconoG/open-meteo-wrapper-npm#readme",
+  "bugs": {
+    "url": "https://github.com/IaconoG/open-meteo-wrapper-npm/issues"
+  },
   "private": true,
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b",
+    "build": "tsc -p tsconfig.app.json",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write .",
     "test": "jest"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "docs"
-  ],
   "dependencies": {
     "immer": "^10.1.1"
   },
@@ -42,6 +45,8 @@
     "@eslint/js": "^9.19.0",
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
+    "@types/node": "^24.0.10",
+    "@types/react": "^19.1.8",
     "@types/testing-library__react": "^10.2.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
@@ -54,6 +59,7 @@
     "jest-fixed-jsdom": "^0.0.9",
     "msw": "^2.7.3",
     "ts-jest": "^29.2.6",
+    "tsc-alias": "^1.8.15",
     "typescript": "~5.7.2",
     "vite": "^6.1.0"
   }
