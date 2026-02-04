@@ -3,10 +3,13 @@
 
 // Usa en su lugar `src/adapters/OpenMeteoAdapter.ts` que implementa el Adapter Pattern
 // y proporciona la misma funcionalidad de transformación de la respuesta de Open-Meteo.
-// No eliminar hasta validar la migración completa.
 
 import { WeatherData } from "../types/apiTypes";
-import { StructureWeatherData, DailyWeatherData, HourlyWeatherData } from "../types/weatherTypes";
+import {
+  StructureWeatherData,
+  DailyWeatherData,
+  HourlyWeatherData,
+} from "../types/weatherTypes";
 import { UNITS, WMO_WEATHER_CODES } from "../utils/constants";
 import { getUvRiskLevel, getUvDescription } from "../utils/utils";
 
