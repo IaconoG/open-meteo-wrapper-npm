@@ -1,12 +1,5 @@
-// Deprecated test (copied for historical reference).
-// Use the tests in the active test suite; do not use or update this file for new features.
-// This file is excluded from test runs via jest.config.ts (testPathIgnorePatterns).
-
-// Original: src/__tests__/weatherDataParser.test.ts
-
 import { WeatherDataParser } from "../models/weatherDataParser";
-import { WeatherData } from "../../src/types/apiTypes";
-import { WeatherDescriptions } from "../../src/types/weatherTypes";
+import { WeatherData, WeatherDescriptions } from "../types/weatherTypes";
 
 describe("WeatherDataParser", () => {
   const mockWeatherData: WeatherData = {
@@ -240,11 +233,11 @@ describe("WeatherDataParser", () => {
     });
 
     it("should handle zero forecast days", () => {
-        const parser = new WeatherDataParser(mockWeatherData, 0, 0);
-        const result = parser.parse();
+      const parser = new WeatherDataParser(mockWeatherData, 0, 0);
+      const result = parser.parse();
 
-        expect(result.currentDay).toBeDefined();
-        expect(result.forecast).toEqual([]);
+      expect(result.currentDay).toBeDefined();
+      expect(result.forecast).toEqual([]);
     });
   });
 });
