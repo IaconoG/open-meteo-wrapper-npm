@@ -1,4 +1,4 @@
-# @giann/open-meteo-wrapper
+# @i-giann/open-meteo-wrapper
 
 Un wrapper completo para la API de Open-Meteo que proporciona hooks de React y servicios reutilizables para obtener datos meteorológicos.
 
@@ -15,7 +15,7 @@ Un wrapper completo para la API de Open-Meteo que proporciona hooks de React y s
 ## 📦 Instalación
 
 ```bash
-npm install @giann/open-meteo-wrapper
+npm install @i-giann/open-meteo-wrapper
 ```
 
 ## 🚀 Uso Rápido
@@ -23,7 +23,7 @@ npm install @giann/open-meteo-wrapper
 ### Con React Hook
 
 ```typescript
-import { useWeather } from "@giann/open-meteo-wrapper";
+import { useWeather } from "@i-giann/open-meteo-wrapper";
 
 function WeatherComponent() {
   const { data, isLoading, error, fetchWeather } = useWeather();
@@ -52,7 +52,7 @@ function WeatherComponent() {
 ### Con Servicio Puro
 
 ```typescript
-import { fetchWeather } from "@giann/open-meteo-wrapper";
+import { fetchWeather } from "@i-giann/open-meteo-wrapper";
 
 async function getWeatherData() {
   const result = await fetchWeather({

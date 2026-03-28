@@ -29,7 +29,7 @@ El servicio devuelve una promesa que resuelve en un objeto con los datos meteoro
 #### Ejemplo de uso:
 
 ```javascript
-import { fetchWeatherService } from "@giann/open-meteo-wrapper";
+import { fetchWeatherService } from "@i-giann/open-meteo-wrapper";
 
 const getWeatherData = async () => {
   try {
@@ -52,7 +52,7 @@ import {
   StructureWeatherData,
   HourlyParams,
   DailyParams,
-} from "@giann/open-meteo-wrapper";
+} from "@i-giann/open-meteo-wrapper";
 
 const getWeatherData = async (): Promise<void> => {
   try {
@@ -74,7 +74,7 @@ getWeatherData();
 ### Ejemplo de uso con más parámetros:
 
 ```javascript
-import { fetchWeatherService } from "@giann/open-meteo-wrapper";
+import { fetchWeatherService } from "@i-giann/open-meteo-wrapper";
 
 const getWeatherData = async () => {
   try {
@@ -102,7 +102,7 @@ import {
   StructureWeatherData,
   HourlyParams,
   DailyParams,
-} from "@giann/open-meteo-wrapper";
+} from "@i-giann/open-meteo-wrapper";
 
 const getWeatherData = async (): Promise<void> => {
   try {

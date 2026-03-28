@@ -30,7 +30,7 @@ El hook devuelve un objeto con las siguientes funciones y propiedades:
 #### Ejemplo de uso:
 
 ```tsx
-import { useWeather } from "@giann/open-meteo-wrapper";
+import { useWeather } from "@i-giann/open-meteo-wrapper";
 import { useEffect } from "react";
 
 const WeatherComponent = () => {

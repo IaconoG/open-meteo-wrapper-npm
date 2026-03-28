@@ -7,7 +7,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ## [1.0.0] - 2026-03-28
 
 ### Added
-- Initial public release of @giann/open-meteo-wrapper.
+- Initial public release of @i-giann/open-meteo-wrapper.
 - React hook API via useWeather.
 - Zustand store integration via useWeatherStore.
 - Weather service API via fetchWeather.

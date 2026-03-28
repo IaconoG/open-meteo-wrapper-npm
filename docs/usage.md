@@ -7,7 +7,7 @@
 ### Uso Avanzado con `useWeather`
 
 ```typescript
-import { useWeather } from "@giann/open-meteo-wrapper";
+import { useWeather } from "@i-giann/open-meteo-wrapper";
 
 function WeatherComponent() {
   const { weatherData, fetchWeather } = useWeather();
@@ -42,7 +42,7 @@ Estos ejemplos muestran cómo configurar parámetros opcionales y la estructura 
 #### Ejemplo 1: Parámetros básicos
 
 ```typescript
-import { fetchWeather } from "@giann/open-meteo-wrapper";
+import { fetchWeather } from "@i-giann/open-meteo-wrapper";
 
 async function getBasicWeather() {
   const weatherData = await fetchWeather({
@@ -71,7 +71,7 @@ Salida esperada:
 #### Ejemplo 2: Parámetros opcionales
 
 ```typescript
-import { fetchWeather } from "@giann/open-meteo-wrapper";
+import { fetchWeather } from "@i-giann/open-meteo-wrapper";
 
 async function getWeatherWithOptions() {
   const weatherData = await fetchWeather({
