@@ -33,11 +33,5 @@
     "skipLibCheck": false
   },
   "include": ["src"],
-  "exclude": [
-    "vite.config.ts",
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "deprecated/**"
-  ]
+  "exclude": ["vite.config.ts", "node_modules", "dist"]
 }
