@@ -3,8 +3,8 @@ import {
   FetchWeatherProps,
   HourlyParams,
   DailyParams,
-  WeatherData,
 } from "../types/weatherTypes";
+import { WeatherData } from "../types/apiTypes";
 
 // Mock global fetch
 global.fetch = jest.fn();
@@ -172,12 +172,12 @@ describe("weatherService", () => {
         signal: { aborted: false } as AbortSignal,
       };
 
-      global.AbortController = jest.fn(() => mockController) as any;
+      global.AbortController = jest.fn(() => mockController) as jest.Mock;
 
       const fetchPromise = new Promise(() => {}); // Promise que nunca se resuelve
       (global.fetch as jest.Mock).mockReturnValueOnce(fetchPromise);
 
-      const resultPromise = fetchWeather(validParams);
+      void fetchWeather(validParams);
 
       // Avanzar 10 segundos para activar el timeout
       jest.advanceTimersByTime(10000);

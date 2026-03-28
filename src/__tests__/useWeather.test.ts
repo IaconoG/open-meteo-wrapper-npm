@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { useWeather } from "../hooks/useWeather";
 import { useWeatherStore } from "../store/useWeatherStore";
 import { fetchWeather as mockFetchWeather } from "../services/weatherService";
@@ -128,8 +128,8 @@ describe("Weather System Tests", () => {
 
     it("should handle loading state correctly", async () => {
       // El estado loading debe reflejar correctamente el ciclo de la petición
-      let resolvePromise: (value: any) => void;
-      const promise = new Promise((resolve) => {
+      let resolvePromise: (value: StructureWeatherData) => void;
+      const promise = new Promise<StructureWeatherData>((resolve) => {
         resolvePromise = resolve;
       });
       (mockFetchWeather as jest.Mock).mockReturnValue(promise);
@@ -144,7 +144,7 @@ describe("Weather System Tests", () => {
       expect(result.current.isLoading()).toBe(true);
       // Resuelve la promesa
       await act(async () => {
-        resolvePromise!(mockWeatherData);
+        resolvePromise(mockWeatherData);
         await promise;
       });
       expect(result.current.isLoading()).toBe(false);
@@ -270,20 +270,25 @@ describe("Weather System Tests", () => {
 
     it("should not fetch if cached data is still valid", async () => {
       // No debe llamar a la API si los datos en caché siguen siendo válidos
-      (mockFetchWeather as jest.Mock).mockResolvedValue({
+      const params: FetchWeatherProps = {
         latitude: 40.7128,
         longitude: -74.006,
+      };
+      (mockFetchWeather as jest.Mock).mockResolvedValue({
+        latitude: params.latitude,
+        longitude: params.longitude,
       });
       const now = Date.now();
       useWeatherStore.setState({
         data: {
-          latitude: 40.7128,
-          longitude: -74.006,
+          latitude: params.latitude,
+          longitude: params.longitude,
           timezone: "America/New_York",
           currentDay: {},
           pastDay: [],
           forecast: [],
         },
+        fetchParams: params,
         lastFetchTime: now, // asumiendo que la lógica interna se basa en lastFetchTime
       });
       const { result } = renderHook(() => useWeatherStore());
@@ -387,7 +392,10 @@ describe("Weather System Tests", () => {
       const { result } = renderHook(() => useWeather());
       // Ejecuta la acción de fetchWeather desde el hook
       await act(async () => {
-        await result.current.fetchWeather({ latitude: 40.7128, longitude: -74.006 });
+        await result.current.fetchWeather({
+          latitude: 40.7128,
+          longitude: -74.006,
+        });
       });
       // Verifica que los datos se reflejan correctamente en el hook
       expect(result.current.data).toEqual(mockWeatherData);

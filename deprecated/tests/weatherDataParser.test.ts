@@ -1,5 +1,6 @@
 import { WeatherDataParser } from "../models/weatherDataParser";
-import { WeatherData, WeatherDescriptions } from "../types/weatherTypes";
+import { WeatherData } from "../../src/types/apiTypes";
+import { WeatherDescriptions } from "../../src/types/weatherTypes";
 
 describe("WeatherDataParser", () => {
   const mockWeatherData: WeatherData = {
