@@ -1,4 +1,4 @@
-// Tipos de mensajes de la API
+// Mantener enums y tipos de dominio
 export enum MessageType {
   SUCCESS = "success",
   ERROR = "error",
@@ -64,36 +64,6 @@ export interface FetchWeatherProps {
   forecast_days?: number;
 }
 
-// Estructura de los datos meteorológicos obtenidos de la API
-export interface WeatherData {
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  timezone_abbreviation?: string;
-  current?: { time: Date };
-  hourly: {
-    time: Date[];
-    temperature_2m: number[];
-    weather_code: number[];
-  } & Partial<
-    Record<
-      Exclude<
-        HourlyParams,
-        HourlyParams.Temperature | HourlyParams.WeatherCode
-      >,
-      number[]
-    >
-  >;
-  daily: {
-    time: Date[];
-    temperature_2m_max: number[];
-    temperature_2m_min: number[];
-    sunrise?: Date[];
-    sunset?: Date[];
-    daylight_duration?: number[];
-  };
-}
-
 // Estructura global con datos meteorológicos organizados
 export interface StructureWeatherData {
   latitude: number;
@@ -103,6 +73,9 @@ export interface StructureWeatherData {
   currentDay: DailyWeatherData;
   forecast: DailyWeatherData[];
 }
+
+// Notas: El tipo WeatherData (respuesta de la API) se ha movido a src/types/apiTypes.ts
+// para separar los DTOs de la API y los tipos de dominio.
 
 // Tipos simplificados para valores meteorológicos
 export interface WeatherValue {

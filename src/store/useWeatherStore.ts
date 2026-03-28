@@ -12,6 +12,15 @@ import {
   MessageType,
 } from "../types/weatherTypes";
 
+// Permite inyectar un fetcher para tests o para cambiar proveedor
+export type WeatherFetcher = (params: FetchWeatherProps) => Promise<StructureWeatherData | FetchError>;
+// Usa un wrapper para permitir la inyección de un fetcher personalizado (útil para tests o cambios futuros de proveedor)
+let defaultFetcher: WeatherFetcher = (params) => fetchWeather(params);
+
+export const setWeatherFetcher = (fetcher: WeatherFetcher) => {
+  defaultFetcher = fetcher;
+};
+
 /**
  * Estado principal del store meteorológico.
  */
@@ -34,34 +43,24 @@ interface WeatherState {
 
 /**
  * Acciones y selectores del store meteorológico.
+ * 
+ * `fetchWeather`: Realiza la consulta meteorológica y actualiza el estado.
+ * `isLoading`, `hasError`, `getError`, `clearError`: Métodos para manejar el estado de carga y errores.
+ * `setAutoRefresh`, `scheduleAutoRefresh`: Métodos para manejar la actualización automática de datos.
+ * `getAllWeatherData`, `getCurrentDayWeather`, `getPastDayWeather`, `getForecastWeather`, `getCurrentHourWeather`: Selectores para acceder a los datos meteorológicos organizados.
  */
 interface WeatherActions {
-  /**
-   * Realiza la solicitud para obtener datos meteorológicos.
-   * @param params Parámetros de la consulta meteorológica
-   */
   fetchWeather: (params: FetchWeatherProps) => Promise<void>;
-  /** Indica si hay una solicitud en curso */
   isLoading: () => boolean;
-  /** Indica si hay un error presente */
   hasError: () => boolean;
-  /** Devuelve el error actual, si existe */
   getError: () => FetchError | null;
-  /** Limpia el error actual */
   clearError: () => void;
-  /** Activa o desactiva la actualización automática */
   setAutoRefresh: (value: boolean) => void;
-  /** Programa la actualización automática para la próxima medianoche local */
   scheduleAutoRefresh: () => void;
-  /** Devuelve todos los datos meteorológicos */
   getAllWeatherData: () => StructureWeatherData | null;
-  /** Devuelve los datos del día actual */
   getCurrentDayWeather: () => DailyWeatherData | null;
-  /** Devuelve los datos de días pasados */
   getPastDayWeather: () => DailyWeatherData[] | null;
-  /** Devuelve los datos de pronóstico */
   getForecastWeather: () => DailyWeatherData[] | null;
-  /** Devuelve los datos meteorológicos de la hora actual */
   getCurrentHourWeather: () => HourlyWeatherData | null;
 }
 
@@ -120,7 +119,7 @@ export const useWeatherStore = create<WeatherState & WeatherActions>()(
         );
 
         try {
-          const result = await fetchWeather(params);
+          const result = await defaultFetcher(params);
 
           // Verifica si la respuesta contiene un error
           if ("error" in (result as FetchError)) {
