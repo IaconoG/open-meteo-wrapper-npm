@@ -1,3 +1,41 @@
-# This file removed as part of removing NPM publish configuration
-# The project no longer publishes to npm; original .npmignore content was removed.
+# Source files
+src/
+deprecated/
 
+# Test files
+**/*.test.ts
+**/*.test.js
+**/*.test.tsx
+**/__tests__/
+**/__tests-utils__/
+
+# Build/Dev config
+vite.config.ts
+vite.config.js
+jest.config.ts
+jest.config.js
+eslint.config.ts
+eslint.config.js
+tsconfig*.json
+.eslintrc*
+.prettier*
+
+# Development
+.vscode/
+.git/
+.gitignore
+.prettierignore
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
