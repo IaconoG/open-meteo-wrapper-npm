@@ -21,10 +21,12 @@ export { fetchWeather } from "./services/weatherService";
  * Este módulo contiene las propiedades necesarias para realizar una solicitud de datos
  * meteorológicos.
  */
+// Export enums as runtime values
+export { DailyParams, HourlyParams, MessageType, ErrorType } from "./types/weatherTypes";
+
+// Export types as type-only
 export type {
   FetchWeatherProps,
-  DailyParams,
-  HourlyParams,
   StructureWeatherData,
   FetchError,
   DailyWeatherData,
