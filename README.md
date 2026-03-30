@@ -20,10 +20,10 @@ npm install @i-giann/open-meteo-wrapper
 
 ## 🚀 Uso Rápido
 
-### Con React Hook
+### Con React Hook (Recomendado - Type Safe)
 
 ```typescript
-import { useWeather } from "@i-giann/open-meteo-wrapper";
+import { useWeather, HourlyParams, DailyParams } from "@i-giann/open-meteo-wrapper";
 
 function WeatherComponent() {
   const { data, isLoading, error, fetchWeather } = useWeather();
@@ -32,8 +32,8 @@ function WeatherComponent() {
     fetchWeather({
       latitude: 40.7128,
       longitude: -74.006,
-      hourly: ["temperature_2m", "weather_code"],
-      daily: ["temperature_2m_max", "temperature_2m_min"],
+      hourly: [HourlyParams.Temperature, HourlyParams.WeatherCode],
+      daily: [DailyParams.TemperatureMax, DailyParams.TemperatureMin],
     });
   }, []);
 
@@ -49,17 +49,17 @@ function WeatherComponent() {
 }
 ```
 
-### Con Servicio Puro
+### Con Servicio Puro (Type Safe)
 
 ```typescript
-import { fetchWeather } from "@i-giann/open-meteo-wrapper";
+import { fetchWeather, HourlyParams, DailyParams } from "@i-giann/open-meteo-wrapper";
 
 async function getWeatherData() {
   const result = await fetchWeather({
     latitude: 40.7128,
     longitude: -74.006,
-    hourly: ["temperature_2m", "relative_humidity_2m"],
-    daily: ["temperature_2m_max", "temperature_2m_min"],
+    hourly: [HourlyParams.Temperature, HourlyParams.RelativeHumidity],
+    daily: [DailyParams.TemperatureMax, DailyParams.TemperatureMin],
   });
 
   if ("error" in result) {
@@ -134,6 +134,43 @@ setAutoRefresh(true); // Actualización automática a medianoche
 ### Caché personalizado
 
 El hook incluye caché inteligente de 10 minutos por defecto.
+
+## ✅ Best Practices
+
+### 1. Usa enums para type safety
+
+✅ **Correcto** - Con autocomplete y tipado estricto:
+```typescript
+import { HourlyParams } from "@i-giann/open-meteo-wrapper";
+fetchWeather({
+  hourly: [HourlyParams.Temperature, HourlyParams.Precipitation],
+});
+```
+
+### 2. Manejo de errores
+
+```typescript
+const result = await fetchWeather({ latitude: 0, longitude: 0 });
+
+if ("error" in result) {
+  console.error(`${result.type}: ${result.error}`);
+  return;
+}
+
+console.log("Datos obtenidos:", result);
+```
+
+### 3. Parámetros opcionales
+
+```typescript
+fetchWeather({
+  latitude: 40.7128,
+  longitude: -74.006,
+  timezone: "America/New_York", // Por defecto: America/Sao_Paulo
+  past_days: 1, // Datos históricos
+  forecast_days: 7, // Pronóstico a futuro
+});
+```
 
 ## 🌍 Ejemplos Completos
 

@@ -2,9 +2,9 @@
 
 ## Services
 
-### `fetchWeatherService`
+### `fetchWeather`
 
-El servicio `fetchWeatherService` permite obtener datos meteorológicos de la API Open-Meteo de manera programática. Este servicio es útil cuando se necesita obtener datos meteorológicos sin utilizar hooks.
+El servicio `fetchWeather` permite obtener datos meteorológicos de la API Open-Meteo de manera programática. Este servicio es útil cuando se necesita obtener datos meteorológicos sin utilizar hooks.
 
 #### Parámetros:
 
@@ -29,13 +29,15 @@ El servicio devuelve una promesa que resuelve en un objeto con los datos meteoro
 #### Ejemplo de uso:
 
 ```javascript
-import { fetchWeatherService } from "@i-giann/open-meteo-wrapper";
+import { fetchWeather, HourlyParams, DailyParams } from "@i-giann/open-meteo-wrapper";
 
 const getWeatherData = async () => {
   try {
-    const data = await fetchWeatherService({
+    const data = await fetchWeather({
       latitude: 40.7128,
       longitude: -74.006,
+      hourly: [HourlyParams.Temperature, HourlyParams.Precipitation],
+      daily: [DailyParams.TemperatureMax, DailyParams.TemperatureMin],
     });
     console.log(data);
   } catch (error) {
@@ -48,17 +50,19 @@ getWeatherData();
 
 ```typescript
 import {
-  fetchWeatherService,
-  StructureWeatherData,
+  fetchWeather,
   HourlyParams,
   DailyParams,
+  StructureWeatherData,
 } from "@i-giann/open-meteo-wrapper";
 
 const getWeatherData = async (): Promise<void> => {
   try {
-    const data: StructureWeatherData = await fetchWeatherService({
+    const data: StructureWeatherData = await fetchWeather({
       latitude: 40.7128,
       longitude: -74.006,
+      hourly: [HourlyParams.Temperature, HourlyParams.WeatherCode],
+      daily: [DailyParams.TemperatureMax, DailyParams.TemperatureMin],
     });
     console.log(data);
   } catch (error) {
@@ -71,49 +75,37 @@ getWeatherData();
 
 > **Nota:** En ambos ejemplos, si solo se pasan la latitud y longitud, se utilizarán parámetros predefinidos para obtener los datos meteorológicos.
 
-### Ejemplo de uso con más parámetros:
-
-```javascript
-import { fetchWeatherService } from "@i-giann/open-meteo-wrapper";
-
-const getWeatherData = async () => {
-  try {
-    const data = await fetchWeatherService({
-      latitude: 40.7128,
-      longitude: -74.006,
-      hourly: ["temperature_2m", "precipitation"],
-      daily: ["temperature_2m_max", "sunrise"],
-      timezone: "America/New_York",
-      past_days: 2,
-      forecast_days: 5,
-    });
-    console.log(data);
-  } catch (error) {
-    console.error("Error fetching weather data:", error);
-  }
-};
-
-getWeatherData();
-```
+### Ejemplo de uso con más parámetros (Recomendado - Type Safe):
 
 ```typescript
 import {
-  fetchWeatherService,
-  StructureWeatherData,
+  fetchWeather,
   HourlyParams,
   DailyParams,
+  StructureWeatherData,
 } from "@i-giann/open-meteo-wrapper";
 
 const getWeatherData = async (): Promise<void> => {
   try {
-    const data: StructureWeatherData = await fetchWeatherService({
+    const data: StructureWeatherData = await fetchWeather({
       latitude: 40.7128,
       longitude: -74.006,
-      hourly: [HourlyParams.Temperature, HourlyParams.Precipitation],
-      daily: [DailyParams.TemperatureMax, DailyParams.Sunrise],
+      hourly: [
+        HourlyParams.Temperature,
+        HourlyParams.Precipitation,
+        HourlyParams.RelativeHumidity,
+        HourlyParams.WindSpeed,
+        HourlyParams.WeatherCode,
+      ],
+      daily: [
+        DailyParams.TemperatureMax,
+        DailyParams.TemperatureMin,
+        DailyParams.Sunrise,
+        DailyParams.Sunset,
+      ],
       timezone: "America/New_York",
       past_days: 2,
-      forecast_days: 5,
+      forecast_days: 7,
     });
     console.log(data);
   } catch (error) {

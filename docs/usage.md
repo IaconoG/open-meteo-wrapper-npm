@@ -1,28 +1,49 @@
 # Uso de Open Meteo Wrapper
 
-## Informacion sobre el hook `useWeather`
+## Información sobre el hook `useWeather`
 
 `useWeather` nos permite obtener datos meteorológicos de la API Open-Meteo. El hook utiliza un almacenamiento global con Zustand para almacenar los datos meteorológicos. Utilizando `useWeather`, podemos acceder a los datos meteorológicos y a la función `fetchWeather` para obtener nuevos datos.
 
-### Uso Avanzado con `useWeather`
+### Uso Avanzado con `useWeather` (Type Safe con Enums)
 
 ```typescript
-import { useWeather } from "@i-giann/open-meteo-wrapper";
+import { useWeather, HourlyParams, DailyParams } from "@i-giann/open-meteo-wrapper";
 
 function WeatherComponent() {
-  const { weatherData, fetchWeather } = useWeather();
+  const { data, isLoading, error, fetchWeather } = useWeather();
+
+  const handleFetchWeather = async () => {
+    await fetchWeather({
+      latitude: 40.7128,
+      longitude: -74.006,
+      hourly: [
+        HourlyParams.Temperature,
+        HourlyParams.Precipitation,
+        HourlyParams.WindSpeed,
+      ],
+      daily: [
+        DailyParams.TemperatureMax,
+        DailyParams.TemperatureMin,
+        DailyParams.Sunrise,
+        DailyParams.Sunset,
+      ],
+    });
+  };
 
   return (
     <div>
-      <button
-        onClick={() => fetchWeather({ latitude: 40.7128, longitude: -74.006 })}
-      >
-        Obtener Clima
+      <button onClick={handleFetchWeather} disabled={isLoading}>
+        {isLoading ? "Cargando..." : "Obtener Clima"}
       </button>
-      {weatherData && (
+      {error && (
+        <div style={{ color: "red" }}>
+          Error ({error.type}): {error.error}
+        </div>
+      )}
+      {data && (
         <div>
-          <p>Temperatura: {weatherData.temperature}°C</p>
-          <p>Condición: {weatherData.condition}</p>
+          <p>Temperatura: {data.currentDay.temperatureMax?.value}°C</p>
+          <p>Condición: {data.currentDay.description?.value}</p>
         </div>
       )}
     </div>
@@ -30,25 +51,33 @@ function WeatherComponent() {
 }
 ```
 
-## Informacion sobre el servicio `fetchWeather`
+## Información sobre el servicio `fetchWeather`
 
 `fetchWeather` es un servicio que permite obtener datos meteorológicos de la API Open-Meteo. Este servicio acepta parámetros como `latitude`, `longitude`, `hourly`, `daily`, `timezone`, `past_days` y `forecast_days`. Estos parámetros son opcionales y permiten personalizar la consulta a la API.
 El servicio devuelve un objeto con los datos meteorológicos obtenidos de la API.
 
-### Uso Avanzado con `fetchWeather`
+### Uso Avanzado con `fetchWeather` (Type Safe con Enums)
 
 Estos ejemplos muestran cómo configurar parámetros opcionales y la estructura de la salida esperada.
 
 #### Ejemplo 1: Parámetros básicos
 
 ```typescript
-import { fetchWeather } from "@i-giann/open-meteo-wrapper";
+import { fetchWeather, HourlyParams, DailyParams } from "@i-giann/open-meteo-wrapper";
 
 async function getBasicWeather() {
   const weatherData = await fetchWeather({
     latitude: 40.7128,
     longitude: -74.006,
+    hourly: [HourlyParams.Temperature, HourlyParams.WeatherCode],
+    daily: [DailyParams.TemperatureMax, DailyParams.TemperatureMin],
   });
+
+  if ("error" in weatherData) {
+    console.error("Error:", weatherData.error);
+    return;
+  }
+
   console.log(weatherData);
 }
 
@@ -61,26 +90,43 @@ Salida esperada:
 {
   "latitude": 40.7128,
   "longitude": -74.006,
-  "current_weather": {
-    "temperature": 15,
-    "condition": "Clear"
+  "currentDay": {
+    "temperatureMax": { "value": 25, "unit": "°C" },
+    "temperatureMin": { "value": 18, "unit": "°C" }
   }
 }
 ```
 
-#### Ejemplo 2: Parámetros opcionales
+#### Ejemplo 2: Parámetros opcionales con enums
 
 ```typescript
-import { fetchWeather } from "@i-giann/open-meteo-wrapper";
+import { fetchWeather, HourlyParams, DailyParams } from "@i-giann/open-meteo-wrapper";
 
 async function getWeatherWithOptions() {
   const weatherData = await fetchWeather({
     latitude: 40.7128,
     longitude: -74.006,
-    hourly: ["temperature_2m", "precipitation"],
-    daily: ["temperature_2m_max", "temperature_2m_min"],
+    hourly: [
+      HourlyParams.Temperature,
+      HourlyParams.Precipitation,
+      HourlyParams.RelativeHumidity,
+      HourlyParams.WindSpeed,
+    ],
+    daily: [
+      DailyParams.TemperatureMax,
+      DailyParams.TemperatureMin,
+      DailyParams.Sunrise,
+      DailyParams.Sunset,
+    ],
     timezone: "America/New_York",
+    past_days: 1,
   });
+
+  if ("error" in weatherData) {
+    console.error("Error:", weatherData.error);
+    return;
+  }
+
   console.log(weatherData);
 }
 
