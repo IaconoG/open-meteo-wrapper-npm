@@ -1,5 +1,11 @@
 import { BASE_URL, WEATHER_CONSTANTS } from "../../utils/constants";
-import { FetchWeatherProps, FetchError, ErrorType, MessageType } from "../../types/weatherTypes";
+import {
+  FetchWeatherProps,
+  FetchError,
+  ErrorType,
+  MessageType,
+  WeatherQueryMode,
+} from "../../types/weatherTypes";
 import { WeatherData } from "../../types/apiTypes";
 
 export interface IWeatherApiClient {
@@ -12,26 +18,45 @@ export class OpenMeteoClient implements IWeatherApiClient {
     longitude,
     hourly = WEATHER_CONSTANTS.DEFAULT_HOURLY_PARAMS,
     daily = WEATHER_CONSTANTS.DEFAULT_DAILY_PARAMS,
+    current = WEATHER_CONSTANTS.DEFAULT_CURRENT_PARAMS,
     timezone = WEATHER_CONSTANTS.DEFAULT_TIMEZONE,
+    mode = WeatherQueryMode.ForecastLength,
     past_days = WEATHER_CONSTANTS.DEFAULT_PAST_DAYS,
     forecast_days = WEATHER_CONSTANTS.DEFAULT_FORECAST_DAYS,
+    start_date,
+    end_date,
   }: FetchWeatherProps): Promise<WeatherData | FetchError> {
     try {
       const url = new URL(BASE_URL);
-      const params = new URLSearchParams({
+      const params: Record<string, string> = {
         latitude: latitude.toString(),
         longitude: longitude.toString(),
         hourly: hourly.join(","),
         daily: daily.join(","),
         timezone,
-        past_days: past_days.toString(),
-        forecast_days: forecast_days.toString(),
-      });
+      };
 
-      url.search = params.toString();
+      if (current?.length) {
+        params.current = current.join(",");
+      }
+
+      if (mode === WeatherQueryMode.TimeInterval) {
+        params.start_date = start_date!;
+        params.end_date = end_date!;
+      } else {
+        params.past_days = past_days.toString();
+        params.forecast_days = forecast_days.toString();
+      }
+
+      const searchParams = new URLSearchParams(params);
+
+      url.search = searchParams.toString();
 
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), WEATHER_CONSTANTS.REQUEST_TIMEOUT);
+      const timeout = setTimeout(
+        () => controller.abort(),
+        WEATHER_CONSTANTS.REQUEST_TIMEOUT,
+      );
 
       const response = await fetch(url.toString(), {
         signal: controller.signal,
@@ -42,7 +67,8 @@ export class OpenMeteoClient implements IWeatherApiClient {
       if (!response.ok) {
         if (response.status >= 500) {
           return this.buildError({
-            error: "Debido a un problema en el servidor, no podemos obtener la información del clima.",
+            error:
+              "Debido a un problema en el servidor, no podemos obtener la información del clima.",
             info: "Por favor, inténtalo de nuevo más tarde.",
             status: response.status,
             errorType: ErrorType.API_ERROR,
@@ -88,7 +114,8 @@ export class OpenMeteoClient implements IWeatherApiClient {
       }
 
       return this.buildError({
-        error: "Ocurrió un error inesperado al obtener los datos meteorológicos.",
+        error:
+          "Ocurrió un error inesperado al obtener los datos meteorológicos.",
         type: MessageType.ERROR,
         status: 0,
         errorType: ErrorType.UNKNOWN_ERROR,
@@ -96,7 +123,13 @@ export class OpenMeteoClient implements IWeatherApiClient {
     }
   }
 
-  private buildError({ error, info, status, type, errorType }: Partial<FetchError>): FetchError {
+  private buildError({
+    error,
+    info,
+    status,
+    type,
+    errorType,
+  }: Partial<FetchError>): FetchError {
     return {
       error: error || "Error desconocido.",
       info,

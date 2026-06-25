@@ -8,12 +8,10 @@ import {
   FetchWeatherProps,
   StructureWeatherData,
   FetchError,
+  WeatherQueryMode,
 } from "../types/weatherTypes";
 import { OpenMeteoClient, IWeatherApiClient } from "./api/OpenMeteoClient";
-import {
-  OpenMeteoAdapter,
-  IWeatherAdapter,
-} from "./adapters/OpenMeteoAdapter";
+import { OpenMeteoAdapter, IWeatherAdapter } from "./adapters/OpenMeteoAdapter";
 import { WeatherData } from "@/types/apiTypes";
 
 /**
@@ -38,32 +36,47 @@ export const fetchWeather = async (
     longitude,
     hourly = WEATHER_CONSTANTS.DEFAULT_HOURLY_PARAMS,
     daily = WEATHER_CONSTANTS.DEFAULT_DAILY_PARAMS,
+    current = WEATHER_CONSTANTS.DEFAULT_CURRENT_PARAMS,
     timezone = WEATHER_CONSTANTS.DEFAULT_TIMEZONE,
+    mode = WeatherQueryMode.ForecastLength,
     past_days = WEATHER_CONSTANTS.DEFAULT_PAST_DAYS,
     forecast_days = WEATHER_CONSTANTS.DEFAULT_FORECAST_DAYS,
+    start_date,
+    end_date,
   } = params;
 
   const clientToUse = options?.client || new OpenMeteoClient();
   const adapterToUse = options?.adapter || new OpenMeteoAdapter();
 
-  const raw = await clientToUse.fetchRaw({
-    latitude,
-    longitude,
-    hourly,
-    daily,
-    timezone,
-    past_days,
-    forecast_days,
-  });
+  const raw =
+    mode === WeatherQueryMode.TimeInterval
+      ? await clientToUse.fetchRaw({
+          latitude,
+          longitude,
+          hourly,
+          daily,
+          current,
+          timezone,
+          mode,
+          start_date: start_date!,
+          end_date: end_date!,
+        })
+      : await clientToUse.fetchRaw({
+          latitude,
+          longitude,
+          hourly,
+          daily,
+          current,
+          timezone,
+          mode,
+          past_days,
+          forecast_days,
+        });
 
   if ("error" in (raw as FetchError)) {
     return raw as FetchError;
   }
 
-  const adapted = adapterToUse.adapt(
-    raw as WeatherData,
-    past_days || 0,
-    forecast_days || 0,
-  );
+  const adapted = adapterToUse.adapt(raw as WeatherData, params);
   return adapted;
 };

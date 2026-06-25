@@ -1,4 +1,5 @@
 import {
+  CurrentParams,
   DailyParams,
   HourlyParams,
   WeatherDescriptions,
@@ -28,6 +29,14 @@ export const WEATHER_CONSTANTS = {
     DailyParams.TemperatureMax,
     DailyParams.TemperatureMin,
   ] as DailyParams[],
+
+  /** Parámetros meteorológicos current solicitados por defecto */
+  DEFAULT_CURRENT_PARAMS: [
+    CurrentParams.WeatherCode,
+    CurrentParams.Temperature,
+    CurrentParams.RelativeHumidity,
+    CurrentParams.ApparentTemperature,
+  ] as CurrentParams[],
 
   /** Número de días pasados a incluir por defecto */
   DEFAULT_PAST_DAYS: 0,
@@ -123,6 +132,8 @@ export const UNITS = {
   temperature_2m: "ºC",
   temperature_2m_max: "ºC",
   temperature_2m_min: "ºC",
+  apparent_temperature_max: "ºC",
+  apparent_temperature_min: "ºC",
   dew_point_2m: "ºC",
   apparent_temperature: "ºC",
 
@@ -133,21 +144,36 @@ export const UNITS = {
   rain: "mm",
   snowfall: "cm",
   snow_depth: "m",
+  precipitation_sum: "mm",
+  rain_sum: "mm",
+  snowfall_sum: "cm",
+  precipitation_hours: "h",
 
   // Presión y viento
   pressure_msl: "hPa",
   wind_speed_10m: "km/h",
   wind_direction_10m: "°",
+  wind_gusts_10m: "km/h",
+  wind_speed_10m_max: "km/h",
+  wind_gusts_10m_max: "km/h",
+  wind_direction_10m_dominant: "°",
+  surface_pressure: "hPa",
 
   // Cielo y visibilidad
   cloud_cover: "%",
   visibility: "km",
   weather_code: "wmo code",
+  showers: "mm",
 
   // Sol y UV
   sunrise: "iso8601",
   sunset: "iso8601",
   daylight_duration: "h",
+  sunshine_duration: "h",
+  shortwave_radiation_sum: "MJ/m²",
+  et0_reference_evapotranspiration: "mm",
+  uv_index_max: "index",
+  uv_index_clear_sky_max: "index",
   uv_index: "index",
   is_day: "flag",
 } as const;

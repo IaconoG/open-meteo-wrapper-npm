@@ -6,6 +6,12 @@ export enum MessageType {
   INFO = "info",
 }
 
+// Modos de consulta soportados por la API
+export enum WeatherQueryMode {
+  ForecastLength = "forecast_length",
+  TimeInterval = "time_interval",
+}
+
 // Tipos de errores de la API
 export enum ErrorType {
   NETWORK_ERROR = "network_error",
@@ -32,14 +38,17 @@ export enum HourlyParams {
   PrecipitationProbability = "precipitation_probability", // En porcentaje %
   Precipitation = "precipitation", // En milímetros mm
   Rain = "rain", // En milímetros mm
+  Showers = "showers", // En milímetros mm
   Snowfall = "snowfall", // En milímetros cm
   SnowDepth = "snow_depth", // En metros m
   WeatherCode = "weather_code", // En código WMO
   PressureMsl = "pressure_msl", // En hectopascales hPa
+  SurfacePressure = "surface_pressure", // En hectopascales hPa
   CloudCover = "cloud_cover", // En porcentaje %
   Visibility = "visibility", // En metros m
   WindSpeed = "wind_speed_10m", // En kilometros por hora km/h
   WindDirection = "wind_direction_10m", // En grados
+  WindGusts = "wind_gusts_10m", // En kilometros por hora km/h
   UvIndex = "uv_index", // Índice UV
   IsDay = "is_day", // Indica si es de día o de noche (1: día, 0: noche)
 }
@@ -48,27 +57,81 @@ export enum HourlyParams {
 export enum DailyParams {
   TemperatureMax = "temperature_2m_max",
   TemperatureMin = "temperature_2m_min",
+  ApparentTemperatureMax = "apparent_temperature_max",
+  ApparentTemperatureMin = "apparent_temperature_min",
+  PrecipitationSum = "precipitation_sum",
+  RainSum = "rain_sum",
+  SnowfallSum = "snowfall_sum",
+  PrecipitationHours = "precipitation_hours",
+  WeatherCode = "weather_code",
   Sunrise = "sunrise",
   Sunset = "sunset",
   DaylightDuration = "daylight_duration",
+  SunshineDuration = "sunshine_duration",
+  WindSpeed10mMax = "wind_speed_10m_max",
+  WindGusts10mMax = "wind_gusts_10m_max",
+  WindDirection10mDominant = "wind_direction_10m_dominant",
+  ShortwaveRadiationSum = "shortwave_radiation_sum",
+  Et0ReferenceEvapotranspiration = "et0_reference_evapotranspiration",
+  UvIndexMax = "uv_index_max",
+  UvIndexClearSkyMax = "uv_index_clear_sky_max",
+}
+
+// Parámetros meteorológicos disponibles para current
+export enum CurrentParams {
+  WeatherCode = "weather_code",
+  WindSpeed = "wind_speed_10m",
+  WindDirection = "wind_direction_10m",
+  WindGusts = "wind_gusts_10m",
+  CloudCover = "cloud_cover",
+  Temperature = "temperature_2m",
+  RelativeHumidity = "relative_humidity_2m",
+  ApparentTemperature = "apparent_temperature",
+  IsDay = "is_day",
+  Precipitation = "precipitation",
+  Rain = "rain",
+  Snowfall = "snowfall",
+  Showers = "showers",
+  SurfacePressure = "surface_pressure",
+  PressureMsl = "pressure_msl",
 }
 
 // Propiedades necesarias para realizar una solicitud de datos meteorológicos
-export interface FetchWeatherProps {
+export interface BaseFetchWeatherProps {
   latitude: number;
   longitude: number;
   hourly?: HourlyParams[];
   daily?: DailyParams[];
+  current?: CurrentParams[];
   timezone?: string;
+}
+
+export interface ForecastLengthFetchWeatherProps extends BaseFetchWeatherProps {
+  mode?: WeatherQueryMode.ForecastLength;
   past_days?: number;
   forecast_days?: number;
+  start_date?: never;
+  end_date?: never;
 }
+
+export interface TimeIntervalFetchWeatherProps extends BaseFetchWeatherProps {
+  mode: WeatherQueryMode.TimeInterval;
+  start_date: string;
+  end_date: string;
+  past_days?: never;
+  forecast_days?: never;
+}
+
+export type FetchWeatherProps =
+  | ForecastLengthFetchWeatherProps
+  | TimeIntervalFetchWeatherProps;
 
 // Estructura global con datos meteorológicos organizados
 export interface StructureWeatherData {
   latitude: number;
   longitude: number;
   timezone: string;
+  current?: CurrentWeatherData;
   pastDay: DailyWeatherData[];
   currentDay: DailyWeatherData;
   forecast: DailyWeatherData[];
@@ -113,9 +176,25 @@ export interface DailyWeatherData {
   hourly?: HourlyWeatherData[];
   temperatureMax?: WeatherValue;
   temperatureMin?: WeatherValue;
+  apparentTemperatureMax?: WeatherValue;
+  apparentTemperatureMin?: WeatherValue;
+  precipitationSum?: WeatherValue;
+  rainSum?: WeatherValue;
+  snowfallSum?: WeatherValue;
+  precipitationHours?: WeatherValue;
+  weatherCode?: WeatherValue;
+  weatherDescription?: TextValue;
   sunrise?: DateValue;
   sunset?: DateValue;
   daylightDuration?: WeatherValue;
+  sunshineDuration?: WeatherValue;
+  windSpeed10mMax?: WeatherValue;
+  windGusts10mMax?: WeatherValue;
+  windDirection10mDominant?: WeatherValue;
+  shortwaveRadiationSum?: WeatherValue;
+  et0ReferenceEvapotranspiration?: WeatherValue;
+  uvIndexMax?: WeatherValue;
+  uvIndexClearSkyMax?: WeatherValue;
 }
 
 // Representa la información meteorológica por hora
@@ -128,16 +207,40 @@ export interface HourlyWeatherData {
   precipitationProbability?: WeatherValue;
   precipitation?: WeatherValue;
   rain?: WeatherValue;
+  showers?: WeatherValue;
   snowfall?: WeatherValue;
   snowDepth?: WeatherValue;
   weatherCode?: WeatherValue;
   weatherDescription?: TextValue;
   pressureMsl?: WeatherValue;
+  surfacePressure?: WeatherValue;
   cloudCover?: WeatherValue;
   visibility?: WeatherValue;
   wind?: WindData;
+  windGusts?: WeatherValue;
   uv?: UVData;
   isDay?: WeatherValue;
+}
+
+// Datos del bloque current simplificados
+export interface CurrentWeatherData {
+  time?: DateValue;
+  weatherCode?: WeatherValue;
+  weatherDescription?: TextValue;
+  windSpeed?: WeatherValue;
+  windDirection?: WeatherValue;
+  windGusts?: WeatherValue;
+  cloudCover?: WeatherValue;
+  temperature?: WeatherValue;
+  relativeHumidity?: WeatherValue;
+  apparentTemperature?: WeatherValue;
+  isDay?: WeatherValue;
+  precipitation?: WeatherValue;
+  rain?: WeatherValue;
+  snowfall?: WeatherValue;
+  showers?: WeatherValue;
+  surfacePressure?: WeatherValue;
+  pressureMsl?: WeatherValue;
 }
 
 // Niveles de riesgo del índice UV

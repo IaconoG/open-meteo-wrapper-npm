@@ -22,11 +22,22 @@ export { fetchWeather } from "./services/weatherService";
  * meteorológicos.
  */
 // Export enums as runtime values
-export { DailyParams, HourlyParams, MessageType, ErrorType } from "./types/weatherTypes";
+export {
+  DailyParams,
+  HourlyParams,
+  CurrentParams,
+  WeatherQueryMode,
+  MessageType,
+  ErrorType,
+} from "./types/weatherTypes";
 
 // Export types as type-only
 export type {
+  BaseFetchWeatherProps,
+  ForecastLengthFetchWeatherProps,
   FetchWeatherProps,
+  CurrentWeatherData,
+  TimeIntervalFetchWeatherProps,
   StructureWeatherData,
   FetchError,
   DailyWeatherData,
