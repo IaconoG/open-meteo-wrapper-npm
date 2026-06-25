@@ -11,6 +11,19 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Export enums (HourlyParams, DailyParams, MessageType, ErrorType) as runtime values, not type-only exports.
 - This fixes runtime errors when trying to use enum values in fetchWeather calls.
 
+## [1.1.0] - 2026-06-25
+
+### Added
+
+- `forecast_length` and `time_interval` query modes for `fetchWeather`.
+- `current` parameter support with the Open-Meteo current weather fields.
+- Expanded hourly, daily, and current parameter enums to match Open-Meteo.
+- Optional structured `current` data in the weather response.
+
+### Changed
+
+- Documentation updated to describe both query modes and the expanded parameter set.
+
 ## [1.0.0] - 2026-03-28
 
 ### Added

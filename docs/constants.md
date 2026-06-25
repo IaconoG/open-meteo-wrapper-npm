@@ -16,13 +16,14 @@ const BASE_URL = "https://api.open-meteo.com/v1/forecast";
 
 `WEATHER_CONSTANTS`: Objeto que contiene las constantes utilizadas para las solicitudes de datos meteorológicos.
 
-| Clave                 | Valor                                       | Descripción                          |
-| --------------------- | ------------------------------------------- | ------------------------------------ |
-| DEFAULT_TIMEZONE      | "America/Sao_Paulo"                         | Zona horaria por defecto.            |
-| DEFAULT_HOURLY_VALUE  | ["temperature_2m", "weather_code"]          | Parámetros predeterminados por hora. |
-| DEFAULT_DAILY_VALUE   | ["temperature_2m_max","temperature_2m_min"] | Parámetros predeterminados por día.  |
-| DEFAULT_PAST_DAYS     | 0                                           | Días pasados por defecto.            |
-| DEFAULT_FORECAST_DAYS | 7                                           | Días de pronóstico por defecto.      |
+| Clave                  | Valor                                                                              | Descripción                              |
+| ---------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------- |
+| DEFAULT_TIMEZONE       | "America/Sao_Paulo"                                                                | Zona horaria por defecto.                |
+| DEFAULT_HOURLY_PARAMS  | ["temperature_2m", "weather_code"]                                                 | Parámetros predeterminados por hora.     |
+| DEFAULT_DAILY_PARAMS   | ["temperature_2m_max","temperature_2m_min"]                                        | Parámetros predeterminados por día.      |
+| DEFAULT_CURRENT_PARAMS | ["weather_code", "temperature_2m", "relative_humidity_2m", "apparent_temperature"] | Parámetros predeterminados para current. |
+| DEFAULT_PAST_DAYS      | 0                                                                                  | Días pasados por defecto.                |
+| DEFAULT_FORECAST_DAYS  | 7                                                                                  | Días de pronóstico por defecto.          |
 
 ```typescript
 export const WEATHER_CONSTANTS = { ... } as const;
@@ -92,32 +93,49 @@ export const WMOWeatherTexts: Record<number, WeatherDescriptions> = { ... } as c
 
 `UNITS`: Objeto que mapea las claves de los parámetros meteorológicos a sus unidades correspondientes.
 
-| Clave                     | Descripción |
-| ------------------------- | ----------- |
-| time                      | iso8601     |
-| temperature_2m_max        | ºC          |
-| temperature_2m_min        | ºC          |
-| sunrise                   | iso8601     |
-| sunset                    | iso8601     |
-| daylight_duration         | h           |
-| hour                      | iso8601     |
-| temperature_2m            | ºC          |
-| relative_humidity_2m      | %           |
-| dew_point_2m              | ºC          |
-| apparent_temperature      | ºC          |
-| precipitation_probability | %           |
-| precipitation             | mm          |
-| rain                      | mm          |
-| snowfall                  | cm          |
-| snow_depth                | m           |
-| weather_code              | wmo code    |
-| pressure_msl              | hPa         |
-| cloud_cover               | %           |
-| visibility                | km          |
-| wind_direction_10m        | º           |
-| wind_speed_10m            | km/h        |
-| uv_index                  | ...         |
-| is_day                    | ...         |
+| Clave                            | Descripción |
+| -------------------------------- | ----------- |
+| time                             | iso8601     |
+| temperature_2m_max               | ºC          |
+| temperature_2m_min               | ºC          |
+| sunrise                          | iso8601     |
+| sunset                           | iso8601     |
+| daylight_duration                | h           |
+| hour                             | iso8601     |
+| temperature_2m                   | ºC          |
+| relative_humidity_2m             | %           |
+| dew_point_2m                     | ºC          |
+| apparent_temperature             | ºC          |
+| apparent_temperature_max         | ºC          |
+| apparent_temperature_min         | ºC          |
+| precipitation_probability        | %           |
+| precipitation                    | mm          |
+| rain                             | mm          |
+| showers                          | mm          |
+| snowfall                         | cm          |
+| snow_depth                       | m           |
+| precipitation_sum                | mm          |
+| rain_sum                         | mm          |
+| snowfall_sum                     | cm          |
+| precipitation_hours              | h           |
+| weather_code                     | wmo code    |
+| pressure_msl                     | hPa         |
+| surface_pressure                 | hPa         |
+| cloud_cover                      | %           |
+| visibility                       | km          |
+| wind_direction_10m               | º           |
+| wind_speed_10m                   | km/h        |
+| wind_gusts_10m                   | km/h        |
+| wind_speed_10m_max               | km/h        |
+| wind_gusts_10m_max               | km/h        |
+| wind_direction_10m_dominant      | º           |
+| sunshine_duration                | h           |
+| shortwave_radiation_sum          | MJ/m²       |
+| et0_reference_evapotranspiration | mm          |
+| uv_index_max                     | ...         |
+| uv_index_clear_sky_max           | ...         |
+| uv_index                         | ...         |
+| is_day                           | ...         |
 
 ```typescript
 export const UNITS = { ... } as const;

@@ -19,9 +19,13 @@ meteorológicos.   |
 | `longitude`    | number             | No       | Longitud de la ubicación de la que se desean obtener los datos meteorológicos.  |
 | `hourly`       | HourlyParams[]     | Sí       | Arreglo de objetos [(`HourlyParams`)](#hourlyparams), contienen los parámetros para obtener los datos meteorológicos por hora. <br> - Por defecto es temperatura y código de tiempo meteorológico.                     |
 | `daily`        | DailyParams[]      | Sí       | Arreglo de objetos [(`DailyParams`)](#dailyparams), contienen los parámetros para obtener los datos meteorológicos diarios. <br> - Por defecto es temperatura máxima y mínima.                             |
+| `current`      | CurrentParams[]    | Sí       | Arreglo de objetos [(`CurrentParams`)](#currentparams), contienen los parámetros current que se desean solicitar. <br> - Por defecto es weather_code, temperature_2m, relative_humidity_2m y apparent_temperature. |
 | `timezone`     | string             | Sí       | Zona horaria de la ubicación. Por defecto es "America/Sao_Paulo".               |
-| `pastDays`     | number             | Sí       | Número de días pasados para los que se desean obtener los datos meteorológicos. <br> - Por defecto es 1. |
-| `forecastDays` | number             | Sí       | Número de días para los que se desean obtener el pronóstico meteorológico. <br> - Por defecto es 7. |
+| `mode`         | WeatherQueryMode   | Sí       | Modo de consulta. Puede ser `forecast_length` o `time_interval`. <br> - Por defecto es `forecast_length`. |
+| `past_days`    | number             | Sí       | Número de días pasados para los que se desean obtener los datos meteorológicos. <br> - Válido en modo `forecast_length`. |
+| `forecast_days` | number            | Sí       | Número de días para los que se desean obtener el pronóstico meteorológico. <br> - Válido en modo `forecast_length`. |
+| `start_date`   | string             | Sí       | Fecha de inicio del intervalo en formato `YYYY-MM-DD`. <br> - Válido en modo `time_interval`. |
+| `end_date`     | string             | Sí       | Fecha de fin del intervalo en formato `YYYY-MM-DD`. <br> - Válido en modo `time_interval`. |
 <!-- prettier-ignore-end -->
 
 > Nota: Ejemplo de `FetchWeatherProps` en la sección de [Ejemplo de `FetchWeatherProps`](#ejemplo-de-fetchweatherprops).
@@ -32,13 +36,28 @@ meteorológicos.   |
 
 - Por defectos los parámetros son `TemperatureMax` y `TemperatureMin`.
 
-| Propiedad          | Descripción                                               |
-| ------------------ | --------------------------------------------------------- |
-| `TemperatureMax`   | Indica si se desea obtener la temperatura máxima del día. |
-| `TemperatureMin`   | Indica si se desea obtener la temperatura mínima del día. |
-| `Sunrise`          | Indica si se desea obtener la hora de salida del sol.     |
-| `Sunset`           | Indica si se desea obtener la hora de puesta del sol.     |
-| `DaylightDuration` | Indica si se desea obtener la duración del día.           |
+| Propiedad                        | Descripción                                                         |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `TemperatureMax`                 | Indica si se desea obtener la temperatura máxima del día.           |
+| `TemperatureMin`                 | Indica si se desea obtener la temperatura mínima del día.           |
+| `ApparentTemperatureMax`         | Indica si se desea obtener la sensación térmica máxima.             |
+| `ApparentTemperatureMin`         | Indica si se desea obtener la sensación térmica mínima.             |
+| `PrecipitationSum`               | Indica si se desea obtener la precipitación acumulada.              |
+| `RainSum`                        | Indica si se desea obtener la lluvia acumulada.                     |
+| `SnowfallSum`                    | Indica si se desea obtener la nieve acumulada.                      |
+| `PrecipitationHours`             | Indica si se desea obtener las horas con precipitación.             |
+| `WeatherCode`                    | Indica si se desea obtener el código meteorológico diario.          |
+| `Sunrise`                        | Indica si se desea obtener la hora de salida del sol.               |
+| `Sunset`                         | Indica si se desea obtener la hora de puesta del sol.               |
+| `DaylightDuration`               | Indica si se desea obtener la duración del día.                     |
+| `SunshineDuration`               | Indica si se desea obtener la duración del sol.                     |
+| `WindSpeed10mMax`                | Indica si se desea obtener la velocidad máxima del viento.          |
+| `WindGusts10mMax`                | Indica si se desea obtener las ráfagas máximas.                     |
+| `WindDirection10mDominant`       | Indica si se desea obtener la dirección dominante del viento.       |
+| `ShortwaveRadiationSum`          | Indica si se desea obtener la radiación de onda corta acumulada.    |
+| `Et0ReferenceEvapotranspiration` | Indica si se desea obtener la evapotranspiración de referencia.     |
+| `UvIndexMax`                     | Indica si se desea obtener el índice UV máximo.                     |
+| `UvIndexClearSkyMax`             | Indica si se desea obtener el índice UV máximo con cielo despejado. |
 
 #### HourlyParams
 
@@ -55,16 +74,41 @@ meteorológicos.   |
 | `PrecipitationProbability` | Indica si se desea obtener la probabilidad de precipitación.        |
 | `Precipitation`            | Indica si se desea obtener la cantidad de precipitación.            |
 | `Rain`                     | Indica si se desea obtener la cantidad de lluvia.                   |
+| `Showers`                  | Indica si se desea obtener los chubascos.                           |
 | `Snowfall`                 | Indica si se desea obtener la cantidad de nieve.                    |
 | `SnowDepth`                | Indica si se desea obtener la cantidad de nieve acumulada.          |
 | `WeatherCode`              | Indica si se desea obtener el código de tiempo meteorológico.       |
 | `PressureMsl`              | Indica si se desea obtener la presión atmosférica al nivel del mar. |
+| `SurfacePressure`          | Indica si se desea obtener la presión superficial.                  |
 | `CloudCover`               | Indica si se desea obtener la cobertura de nubes.                   |
 | `Visibility`               | Indica si se desea obtener la visibilidad.                          |
 | `WindSpeed`                | Indica si se desea obtener la velocidad del viento.                 |
 | `WindDirection`            | Indica si se desea obtener la dirección del viento.                 |
+| `WindGusts`                | Indica si se desea obtener las ráfagas de viento.                   |
 | `UvIndex`                  | Indica si se desea obtener el índice UV.                            |
 | `IsDay`                    | Indica si se desea obtener si es de día o de noche.                 |
+
+#### CurrentParams
+
+`CurrentParams`: Enum que contiene los parámetros disponibles para el bloque `current`.
+
+| Propiedad             | Descripción                      |
+| --------------------- | -------------------------------- |
+| `WeatherCode`         | Código meteorológico actual.     |
+| `WindSpeed`           | Velocidad actual del viento.     |
+| `WindDirection`       | Dirección actual del viento.     |
+| `WindGusts`           | Ráfagas actuales.                |
+| `CloudCover`          | Cobertura de nubes.              |
+| `Temperature`         | Temperatura actual.              |
+| `RelativeHumidity`    | Humedad relativa actual.         |
+| `ApparentTemperature` | Sensación térmica actual.        |
+| `IsDay`               | Indicador de día/noche.          |
+| `Precipitation`       | Precipitación actual.            |
+| `Rain`                | Lluvia actual.                   |
+| `Snowfall`            | Nieve actual.                    |
+| `Showers`             | Chubascos actuales.              |
+| `SurfacePressure`     | Presión superficial actual.      |
+| `PressureMsl`         | Presión al nivel del mar actual. |
 
 ## Fetch Weather Response types
 
@@ -78,6 +122,7 @@ meteorológicos.   |
 | `latitude`   | number             | No       | Latitud de la ubicación.                                                                  |
 | `longitude`  | number             | No       | Longitud de la ubicación.                                                                 |
 | `timezone`   | string             | No       | Zona horaria de la ubicación.                                                             |
+| `current`    | CurrentWeatherData | Sí       | Bloque de datos current devuelto por la API Open-Meteo.                                   |
 | `currentDay` | DailyWeatherData   | No       | Datos meteorológicos [`DailyWeatherData`](#dailyweatherdata) del día actual.              |
 | `pastDay`    | DailyWeatherData[] | No       | Arreglos de datos meteorológicos [`DailyWeatherData`](#dailyweatherdata) de días pasados. |
 | `forecast`   | DailyWeatherData[] | No       | Arreglos de datos meteorológicos [`DailyWeatherData`](#dailyweatherdata) del pronóstico.  |
@@ -90,15 +135,21 @@ meteorológicos.   |
 
 `DailyWeatherData`: Objeto que contiene los datos meteorológicos diarios.
 
-| Propiedad          | Tipo                      | Opcional | Descripción                                                   |
-| ------------------ | ------------------------- | -------- | ------------------------------------------------------------- |
-| `day`              | Metric<Date, "iso8601">   | Sí       | Objeto que contiene la fecha del día.                         |
-| `hourly`           | HourlyWeatherData[]       | Sí       | Arreglo de datos meteorológicos `HourlyWeatherData` por hora. |
-| `temperatureMax`   | Metric<number, "ºC">      | Sí       | Objeto que contiene la temperatura máxima del día.            |
-| `temperatureMin`   | Metric<number, "ºC">      | Sí       | Objeto que contiene la temperatura mínima del día.            |
-| `sunrise`          | Metric<Date, "iso8601">   | Sí       | Objeto que contiene la hora de salida del sol.                |
-| `sunset`           | Metric<Date, "iso8601">   | Sí       | Objeto que contiene la hora de puesta del sol.                |
-| `daylightDuration` | Metric<number, "minutes"> | Sí       | Objeto que contiene la duración del día.                      |
+| Propiedad                  | Tipo                                | Opcional | Descripción                                                   |
+| -------------------------- | ----------------------------------- | -------- | ------------------------------------------------------------- |
+| `day`                      | Metric<Date, "iso8601">             | Sí       | Objeto que contiene la fecha del día.                         |
+| `hourly`                   | HourlyWeatherData[]                 | Sí       | Arreglo de datos meteorológicos `HourlyWeatherData` por hora. |
+| `temperatureMax`           | Metric<number, "ºC">                | Sí       | Objeto que contiene la temperatura máxima del día.            |
+| `temperatureMin`           | Metric<number, "ºC">                | Sí       | Objeto que contiene la temperatura mínima del día.            |
+| `sunrise`                  | Metric<Date, "iso8601">             | Sí       | Objeto que contiene la hora de salida del sol.                |
+| `sunset`                   | Metric<Date, "iso8601">             | Sí       | Objeto que contiene la hora de puesta del sol.                |
+| `daylightDuration`         | Metric<number, "minutes">           | Sí       | Objeto que contiene la duración del día.                      |
+| `sunshineDuration`         | Metric<number, "hours">             | Sí       | Objeto que contiene la duración del sol.                      |
+| `weatherCode`              | Metric<number, "wmo code">          | Sí       | Código meteorológico diario.                                  |
+| `weatherDescription`       | Metric<WeatherDescriptions, "text"> | Sí       | Descripción del estado del tiempo.                            |
+| `windSpeed10mMax`          | Metric<number, "km/h">              | Sí       | Velocidad máxima del viento.                                  |
+| `windGusts10mMax`          | Metric<number, "km/h">              | Sí       | Ráfagas máximas del viento.                                   |
+| `windDirection10mDominant` | Metric<number, "°">                 | Sí       | Dirección dominante del viento.                               |
 
 ##### HourlyWeatherData
 
@@ -126,6 +177,30 @@ meteorológicos.   |
 | `uv`                       | UVDataMetric                        | Sí       | Objeto que contiene el índice UV.                             |
 | `isDay`                    | Metric<boolean, "">                 | Sí       | Objeto que contiene si es de día o de noche.                  |
 <!-- prettier-ignore-end -->
+
+#### CurrentWeatherData
+
+`CurrentWeatherData`: Objeto que contiene los datos actuales devueltos por Open-Meteo.
+
+| Propiedad             | Tipo                                | Opcional | Descripción                               |
+| --------------------- | ----------------------------------- | -------- | ----------------------------------------- |
+| `time`                | Metric<Date, "iso8601">             | Sí       | Momento de referencia del bloque current. |
+| `weatherCode`         | Metric<number, "wmo code">          | Sí       | Código meteorológico actual.              |
+| `weatherDescription`  | Metric<WeatherDescriptions, "text"> | Sí       | Descripción del tiempo actual.            |
+| `windSpeed`           | Metric<number, "km/h">              | Sí       | Velocidad del viento.                     |
+| `windDirection`       | Metric<number, "°">                 | Sí       | Dirección del viento.                     |
+| `windGusts`           | Metric<number, "km/h">              | Sí       | Ráfagas de viento.                        |
+| `cloudCover`          | Metric<number, "%">                 | Sí       | Cobertura nubosa.                         |
+| `temperature`         | Metric<number, "ºC">                | Sí       | Temperatura actual.                       |
+| `relativeHumidity`    | Metric<number, "%">                 | Sí       | Humedad relativa.                         |
+| `apparentTemperature` | Metric<number, "ºC">                | Sí       | Sensación térmica.                        |
+| `isDay`               | Metric<number, "flag">              | Sí       | Día o noche.                              |
+| `precipitation`       | Metric<number, "mm">                | Sí       | Precipitación actual.                     |
+| `rain`                | Metric<number, "mm">                | Sí       | Lluvia actual.                            |
+| `snowfall`            | Metric<number, "cm">                | Sí       | Nieve actual.                             |
+| `showers`             | Metric<number, "mm">                | Sí       | Chubascos actuales.                       |
+| `surfacePressure`     | Metric<number, "hPa">               | Sí       | Presión superficial.                      |
+| `pressureMsl`         | Metric<number, "hPa">               | Sí       | Presión al nivel del mar.                 |
 
 #### WeatherDescriptions
 
