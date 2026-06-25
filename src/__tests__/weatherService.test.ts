@@ -3,6 +3,8 @@ import {
   FetchWeatherProps,
   HourlyParams,
   DailyParams,
+  CurrentParams,
+  WeatherQueryMode,
 } from "../types/weatherTypes";
 import { WeatherData } from "../types/apiTypes";
 
@@ -161,6 +163,35 @@ describe("weatherService", () => {
       expect(url.searchParams.get("timezone")).toBe("America/Sao_Paulo");
       expect(url.searchParams.get("past_days")).toBe("0");
       expect(url.searchParams.get("forecast_days")).toBe("7");
+    });
+
+    it("should build a time interval query and forward current params", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockApiResponse,
+      });
+
+      await fetchWeather({
+        latitude: 40.7128,
+        longitude: -74.006,
+        hourly: [HourlyParams.Temperature],
+        daily: [DailyParams.TemperatureMax],
+        current: [CurrentParams.WeatherCode, CurrentParams.Temperature],
+        mode: WeatherQueryMode.TimeInterval,
+        start_date: "2025-01-01",
+        end_date: "2025-01-03",
+      });
+
+      const fetchCall = (global.fetch as jest.Mock).mock.calls[0][0];
+      const url = new URL(fetchCall);
+
+      expect(url.searchParams.get("current")).toBe(
+        "weather_code,temperature_2m",
+      );
+      expect(url.searchParams.get("start_date")).toBe("2025-01-01");
+      expect(url.searchParams.get("end_date")).toBe("2025-01-03");
+      expect(url.searchParams.get("past_days")).toBeNull();
+      expect(url.searchParams.get("forecast_days")).toBeNull();
     });
 
     it("should handle fetch abortion after timeout", async () => {
